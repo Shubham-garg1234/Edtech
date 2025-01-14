@@ -27,10 +27,10 @@ export const Header = () => {
           <a href="/teach" className="hidden md:block text-sm font-medium">
             Teach on XYZ
           </a>
-          <Button variant="ghost" size="icon" className="relative">
+          <Button variant="ghost" size="icon" className="relative" onClick={() => navigate("/cart")}>
             <ShoppingCart className="h-5 w-5" />
             <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-xs text-white flex items-center justify-center">
-              0
+              2
             </span>
           </Button>
           <div className="hidden md:flex gap-2">
