@@ -2,9 +2,35 @@ import { Search, ShoppingCart, User } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export const Header = () => {
   const navigate = useNavigate();
+  const [searchResults, setSearchResults] = useState([]);
+
+  async function handleSearch(str) {
+    try {
+        if(str==""){
+          setSearchResults([]);
+          return;
+        }
+        const response = await fetch("http://localhost:8081/api/v1/getLike", {
+            method: "POST",
+            headers: {
+                "Content-Type": "text/plain",
+            },
+            body: str,
+        });
+
+        const data = await response.json();
+        setSearchResults(data);
+
+    } catch (error) {
+        console.error("Error during fetch:", error);
+    }
+}
+
+
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -18,8 +44,26 @@ export const Header = () => {
               type="search"
               placeholder="Search courses..."
               className="w-full pl-10"
+              onChange={(e)=>{handleSearch(e.target.value)}}
             />
             <Search className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+
+            {searchResults.length > 0 && (
+              <div className="absolute left-0 w-full mt-11 max-h-60 overflow-y-auto bg-white shadow-lg border rounded-lg z-10">
+                <ul className="space-y-2">
+                  {searchResults.map((course, index) => (
+                    <li key={index} className="border-b py-2 px-4">
+                      <a
+                        href={`/course/${course.courseId}`}
+                        className="text-primary hover:underline"
+                      >
+                        {course.courseName}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
 

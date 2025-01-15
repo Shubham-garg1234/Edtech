@@ -5,20 +5,24 @@ import java.util.UUID;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Data
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 
 @Entity
+@Table(name = "Courses")
 public class Courses {
     @Id
-    private UUID CourseId = UUID.randomUUID();
+    private int CourseId = UUID.randomUUID().hashCode();
     private String CourseName;
     private String Description;
     private Date StartDate;
@@ -28,7 +32,8 @@ public class Courses {
     private int Lectures;
     private int Tests;
     private int Assignments;
+    private String CourseImageURL;
 
     @ManyToOne
-    private Instructor instructor; // Reference to the Instructor
+    private Instructors instructor; // Reference to the Instructor
 }

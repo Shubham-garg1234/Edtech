@@ -1,27 +1,29 @@
 package com.edtech.edtch.models;
 
-import java.util.UUID;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Data
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 
 @Entity
-public class Instructor {
+@Table(name="Instructor")
+public class Instructors {
     @Id
-    private UUID InstructorId; // Same as UserId
+    private int InstructorId; 
     private String Qualifications;
     private int Experience;
 
     @OneToOne
-    private User user; // Maps the instructor to the user
+    private Users user; 
 }

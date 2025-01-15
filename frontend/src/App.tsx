@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Cart from "./pages/Cart"
 import Teach from "./pages/Teach"
+import CourseCard from "./pages/CourseCard";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/signup" element={<Signup />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/teach" element={<Teach />} />
+          <Route path="/Course/:CourseId" element={<CourseCard />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

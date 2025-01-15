@@ -5,26 +5,28 @@ import { ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 
 // Sample course data - in a real app this would come from an API
-const initialCourses = [
-  {
-    id: 1,
-    title: "React Masterclass 2024",
-    price: 99.99,
-    image: "https://placehold.co/400x300/9b87f5/ffffff?text=React+Course",
-  },
-  {
-    id: 2,
-    title: "TypeScript Advanced Concepts",
-    price: 79.99,
-    image: "https://placehold.co/400x300/7E69AB/ffffff?text=TypeScript+Course",
-  },
-  {
-    id: 3,
-    title: "Web Development Bootcamp",
-    price: 149.99,
-    image: "https://placehold.co/400x300/9b87f5/ffffff?text=Web+Dev+Course",
-  },
-];
+// const initialCourses = [
+//   {
+//     id: 1,
+//     title: "React Masterclass 2024",
+//     price: 99.99,
+//     image: "https://placehold.co/400x300/9b87f5/ffffff?text=React+Course",
+//   },
+//   {
+//     id: 2,
+//     title: "TypeScript Advanced Concepts",
+//     price: 79.99,
+//     image: "https://placehold.co/400x300/7E69AB/ffffff?text=TypeScript+Course",
+//   },
+//   {
+//     id: 3,
+//     title: "Web Development Bootcamp",
+//     price: 149.99,
+//     image: "https://placehold.co/400x300/9b87f5/ffffff?text=Web+Dev+Course",
+//   },
+// ];
+
+const initialCourses=[];
 
 const Index = () => {
   const [cartItems, setCartItems] = useState(initialCourses);

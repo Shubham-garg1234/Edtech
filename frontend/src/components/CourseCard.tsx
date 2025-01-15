@@ -7,6 +7,7 @@ interface CourseCardProps {
   price: number;
   rating: number;
   image: string;
+  onClick?: () => void;
 }
 
 export const CourseCard = ({
@@ -15,9 +16,11 @@ export const CourseCard = ({
   price,
   rating,
   image,
+  onClick,
 }: CourseCardProps) => {
   return (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
+    <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg" onClick={onClick}>
+      
       <a href="#" className="block">
         <img
           src={image}

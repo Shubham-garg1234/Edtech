@@ -1,10 +1,11 @@
 package com.edtech.edtch.models;
 
-import java.util.UUID;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -16,14 +17,16 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
 @Entity
-@Table(name="Topics")
-public class Topics {
+
+public class Cart {
     @Id
-    private int TopicId = UUID.randomUUID().hashCode();
-    private String TopicName;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne
-    private Courses course; 
+    private Users user;
+
+    @ManyToOne
+    private Courses course;
 }
