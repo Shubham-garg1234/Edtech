@@ -2,8 +2,13 @@ package com.edtech.edtch.models;
 
 import java.sql.Date;
 import java.util.UUID;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -22,7 +27,7 @@ import lombok.Setter;
 @Table(name = "Courses")
 public class Courses {
     @Id
-    private int CourseId = UUID.randomUUID().hashCode();
+    private int CourseId=UUID.randomUUID().hashCode();
     private String CourseName;
     private String Description;
     private Date StartDate;
@@ -34,6 +39,7 @@ public class Courses {
     private int Assignments;
     private String CourseImageURL;
 
-    @ManyToOne
-    private Instructors instructor; // Reference to the Instructor
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "instructor_id")
+    private Instructors instructor;
 }

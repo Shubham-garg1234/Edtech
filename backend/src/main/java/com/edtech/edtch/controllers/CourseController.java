@@ -55,4 +55,10 @@ public class CourseController {
         return courseService.getLike(str);
     }
 
+    @PostMapping("/addCourse/{userId}")
+    public Courses addCourse(@RequestBody Courses course, @PathVariable int userId) {
+        System.out.println(userId);
+        return courseService.addCourse(course, userId);
+    }
+
 }

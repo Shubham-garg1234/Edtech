@@ -83,9 +83,9 @@ const handleCartClick = () => {
         </div>
 
         <nav className="flex items-center gap-6">
-          <a href="/teach" className="hidden md:block text-sm font-medium">
+          <span className="hidden md:block text-sm font-medium cursor-pointer" onClick={()=>navigate("/teach")}>
             Teach on XYZ
-          </a>
+          </span>
           <Button variant="ghost" size="icon" className="relative" onClick={() => handleCartClick()}>
             <ShoppingCart className="h-5 w-5" />
             <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-xs text-white flex items-center justify-center">

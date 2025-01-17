@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -20,15 +21,18 @@ import {
 import { CalendarIcon, Upload } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useAuth } from "@/AuthContext";
 
 const Index = () => {
   const [startDate, setStartDate] = useState<Date>();
   const [image, setImage] = useState<string>("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     courseName: "",
     price: "",
-    seats: "",
+    slots: "",
     description: "",
     instructorName: "",
     qualifications: "",
@@ -94,13 +98,65 @@ const Index = () => {
     }
   };
 
+  const registerCourse = async () => {
+    const course = {
+      courseName: formData.courseName,
+      price: formData.price,
+      slots: formData.slots,
+      description: formData.description,
+      instructor: {
+        instructorName: formData.instructorName,
+        qualifications: formData.qualifications,
+        experience: formData.experience,
+      },
+      duration: formData.duration,
+      tests: formData.numTests,
+      lectures: formData.numLectures,
+      assignments: formData.numAssignments,
+      startDate: startDate,
+    };
+  
+    console.log("Registering course:", course);
+    console.log("http://localhost:8081/api/v1/addCourse/"+user.userId);
+
+    try {
+      const response = await fetch("http://localhost:8081/api/v1/addCourse/"+user.userId, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(course),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Course registered successfully:", data);
+        alert("Course registered successfully!");
+      } else {
+        console.error("Failed to register course:", response.statusText);
+        alert("Failed to register course. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error registering course:", error);
+      alert("An error occurred. Please try again later.");
+    }
+  };
+  
+
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-indigo-50 via-white to-pink-50">
+      <button
+    onClick={() => navigate('/')}
+    className="mb-6 text-gray-600 flex items-center hover:text-gray-900 absolute top-7 left-10"
+  >
+    <span className="mr-1">←</span> Back
+  </button>
       <div className="max-w-4xl mx-auto">
         <Card className="animate-in">
+          
           <CardHeader>
             <CardTitle className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-500">
-              Register Your Course
+              Register Your Course 
             </CardTitle>
             <CardDescription>
               Fill in the details below to register your new course
@@ -174,13 +230,13 @@ const Index = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="seats">Number of Seats</Label>
+                  <Label htmlFor="slots">Number of slots</Label>
                   <Input
-                    id="seats"
-                    name="seats"
+                    id="slots"
+                    name="slots"
                     type="number"
-                    placeholder="Enter number of seats"
-                    value={formData.seats}
+                    placeholder="Enter number of slots"
+                    value={formData.slots}
                     onChange={handleInputChange}
                     min="1"
                     required
@@ -351,6 +407,7 @@ const Index = () => {
               <Button
                 type="submit"
                 className="w-full bg-gradient-to-r from-indigo-600 to-pink-500 hover:from-indigo-500 hover:to-pink-400 text-white transition-all duration-200"
+                onClick={registerCourse}
               >
                 Register Course
               </Button>

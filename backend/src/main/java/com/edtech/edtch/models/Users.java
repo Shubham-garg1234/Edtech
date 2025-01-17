@@ -1,7 +1,8 @@
 package com.edtech.edtch.models;
 
-import java.util.UUID;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,8 @@ import lombok.Setter;
 @Table(name="Users")
 public class Users {
     @Id
-    private int UserId = UUID.randomUUID().hashCode();
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int UserId;
     private String UserName;
     private String Email;
     private String Password;
