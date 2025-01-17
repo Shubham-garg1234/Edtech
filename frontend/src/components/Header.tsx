@@ -3,13 +3,18 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "@/AuthContext";
+import { toast } from "@/components/ui/use-toast";
 
 export const Header = () => {
   const navigate = useNavigate();
   const [searchResults, setSearchResults] = useState([]);
+  const[searchWord,setSearchWord]=useState("");
+  const { user ,numberOfItemInCart, setNumberOfItemInCart} = useAuth();
 
   async function handleSearch(str) {
     try {
+        setSearchWord(str);
         if(str==""){
           setSearchResults([]);
           return;
@@ -30,6 +35,17 @@ export const Header = () => {
     }
 }
 
+const handleCartClick = () => {
+    if (!(user.userId)) {
+      toast({
+        title: "Please login first",
+        description: "You need to log in to see your cart.",
+      });
+    } else {
+      navigate("/cart");
+    }
+  };
+
 
 
   return (
@@ -48,13 +64,12 @@ export const Header = () => {
             />
             <Search className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
 
-            {searchResults.length > 0 && (
+            {searchWord!="" && searchResults.length > 0 && (
               <div className="absolute left-0 w-full mt-11 max-h-60 overflow-y-auto bg-white shadow-lg border rounded-lg z-10">
                 <ul className="space-y-2">
                   {searchResults.map((course, index) => (
-                    <li key={index} className="border-b py-2 px-4">
+                    <li key={index} className="border-b py-2 px-4 cursor-pointer hover:bg-gray-100" onClick={()=>navigate(`/course/${course.courseId}`)}>
                       <a
-                        href={`/course/${course.courseId}`}
                         className="text-primary hover:underline"
                       >
                         {course.courseName}
@@ -71,12 +86,23 @@ export const Header = () => {
           <a href="/teach" className="hidden md:block text-sm font-medium">
             Teach on XYZ
           </a>
-          <Button variant="ghost" size="icon" className="relative" onClick={() => navigate("/cart")}>
+          <Button variant="ghost" size="icon" className="relative" onClick={() => handleCartClick()}>
             <ShoppingCart className="h-5 w-5" />
             <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-xs text-white flex items-center justify-center">
-              2
+              {numberOfItemInCart}
             </span>
           </Button>
+          {user.userName ? (
+            <>
+            <span className="text-sm font-medium">Hi, {user.userName}!</span>
+            <div className="hidden md:flex gap-2">
+              <Button variant="ghost" onClick={() => navigate("/")}>
+                Logout
+              </Button>
+            </div>
+          </>
+          ) :(
+            <>
           <div className="hidden md:flex gap-2">
             <Button variant="ghost" onClick={() => navigate("/login")}>
               Log in
@@ -91,6 +117,8 @@ export const Header = () => {
           >
             <User className="h-5 w-5" />
           </Button>
+          </>)
+        }
         </nav>
       </div>
     </header>

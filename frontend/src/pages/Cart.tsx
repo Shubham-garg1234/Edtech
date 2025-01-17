@@ -1,45 +1,84 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CartItem from "../components/CartItem";
 import CartSummary from "../components/CartSummary";
 import { ShoppingCart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useAuth } from "@/AuthContext";
 
-// Sample course data - in a real app this would come from an API
-// const initialCourses = [
-//   {
-//     id: 1,
-//     title: "React Masterclass 2024",
-//     price: 99.99,
-//     image: "https://placehold.co/400x300/9b87f5/ffffff?text=React+Course",
-//   },
-//   {
-//     id: 2,
-//     title: "TypeScript Advanced Concepts",
-//     price: 79.99,
-//     image: "https://placehold.co/400x300/7E69AB/ffffff?text=TypeScript+Course",
-//   },
-//   {
-//     id: 3,
-//     title: "Web Development Bootcamp",
-//     price: 149.99,
-//     image: "https://placehold.co/400x300/9b87f5/ffffff?text=Web+Dev+Course",
-//   },
-// ];
 
-const initialCourses=[];
+const Cart = () => {
+const navigate = useNavigate();
+const newCartItems=[];
+const [cartItems, setCartItems] = useState([]);  
+const { user ,numberOfItemInCart, setNumberOfItemInCart } = useAuth();
 
-const Index = () => {
-  const [cartItems, setCartItems] = useState(initialCourses);
+useEffect(()=>{
+  if(!(user.userId)) navigate('/');
+  else{
+    getCartItems();
+  }
+},[])
 
   const handleRemoveItem = (id: number) => {
     setCartItems(cartItems.filter(item => item.id !== id));
-    toast.success("Item removed from cart");
+    deleteItemFromCart(user.userId,id);
   };
 
   const handleCheckout = () => {
     toast.success("Proceeding to checkout...");
-    // Here you would typically redirect to a checkout page
   };
+
+  async function getCartItems(){
+    try {
+      const response = await fetch("http://localhost:8081/api/v1/getCartItems", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify(user)
+      });
+
+      const data = await response.json();
+      for(let i=0;i<data.length;i++){
+        newCartItems.push({
+          id: data[i].courseid,
+          title: data[i].courseName,
+          price: data[i].price,
+          image: data[i].courseImageURL,
+        });
+      }
+      setCartItems(newCartItems);
+
+  } catch (error) {
+      console.error("Error during fetch:", error);
+  }
+  }
+
+
+  async function deleteItemFromCart(userId, courseId) {
+    try {
+      const response = await fetch("http://localhost:8081/api/v1/deleteItem", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId, courseId }),
+      });
+  
+      if (response.ok) {
+        setNumberOfItemInCart(numberOfItemInCart-1);
+        toast.success("Item removed from cart");
+      } else {
+        const error = await response.json();
+        console.error("Error:", error);
+        return { success: false, message: error };
+      }
+    } catch (error) {
+      console.error("Unexpected Error:", error);
+      return { success: false, message: "Something went wrong." };
+    }
+  }  
 
   const total = cartItems.reduce((sum, item) => sum + item.price, 0);
 
@@ -51,6 +90,13 @@ const Index = () => {
           <h1 className="text-2xl font-bold text-gray-900">Your Cart</h1>
         </div>
 
+        <button
+          onClick={() => navigate('/')}
+          className="mb-6 text-gray-600 flex items-center hover:text-gray-900"
+        >
+          <span className="mr-1">←</span> Back
+        </button>
+        
         {cartItems.length === 0 ? (
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold text-gray-600">Your cart is empty</h2>
@@ -77,4 +123,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Cart;

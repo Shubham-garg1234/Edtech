@@ -6,6 +6,7 @@ import { toast } from "@/components/ui/use-toast";
 const CourseCard = () => {
     const { CourseId } = useParams();
     const [CourseDetails,setCourseDetails]=useState({
+        cousrseId: CourseId,
         courseName:"Loading",
         description:"Loading",
         duration:"Loading",
@@ -19,6 +20,7 @@ const CourseCard = () => {
 
 
   const handleAddToCart = () => {
+    console.log("HI");
     toast({
       title: "Course added to cart",
       description: "You can now proceed to checkout",

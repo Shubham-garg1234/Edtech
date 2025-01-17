@@ -1,32 +1,31 @@
-package com.edtech.edtch.models;
+        package com.edtech.edtch.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+        import java.util.UUID;
 
-@Data
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity
+        import jakarta.persistence.Entity;
+        import jakarta.persistence.Id;
+        import jakarta.persistence.ManyToOne;
+        import lombok.AllArgsConstructor;
+        import lombok.Data;
+        import lombok.Getter;
+        import lombok.NoArgsConstructor;
+        import lombok.Setter;
 
-public class Cart {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+        @Data
+        @Getter
+        @Setter
+        @NoArgsConstructor
+        @AllArgsConstructor
+        @Entity
 
-    @ManyToOne
-    private Users user;
+        public class Cart {
 
-    @ManyToOne
-    private Courses course;
-}
+            @Id
+            private int CartId = UUID.randomUUID().hashCode();
+
+            @ManyToOne
+            private Users user;
+
+            @ManyToOne
+            private Courses course;
+        }

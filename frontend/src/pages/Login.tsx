@@ -13,6 +13,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
+import { useState,useContext } from "react";
+import { useAuth } from "@/AuthContext";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -29,9 +31,28 @@ const Login = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-    // Here you would typically handle login logic
+  const { setUser,numberOfItemInCart, setNumberOfItemInCart } = useAuth();
+
+  const onSubmit = async(values: z.infer<typeof formSchema>) => {
+    try {
+        const response = await fetch("http://localhost:8081/auth/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(values),
+        });
+
+        if(response.ok){
+          const res2=await response.json();
+          setUser({ userId: res2.userId, userName: res2.userName,  });
+          setNumberOfItemInCart(res2.numberOfItemInCart);
+          navigate('/');
+        }
+
+    } catch (error) {
+        console.error("Error during fetch:", error);
+    }
   };
 
   return (

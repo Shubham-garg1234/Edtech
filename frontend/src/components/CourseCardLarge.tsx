@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Star, ArrowLeft, Clock, BookOpen, FileText, GraduationCap } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { toast } from "@/components/ui/use-toast";
+import { useAuth } from '@/AuthContext';
 
 
 interface CourseCardProps {
@@ -36,6 +38,8 @@ export const CourseCardLarge = ({
   }: CourseCardProps) => {
   const [isInCart, setIsInCart] = useState(false);
   const navigate = useNavigate();
+  const { user ,numberOfItemInCart, setNumberOfItemInCart } = useAuth();
+  const { CourseId } = useParams();
   const courseData = {
     name: name,
     instructor: instructor,
@@ -49,9 +53,47 @@ export const CourseCardLarge = ({
     description: description,
     image: imageUrl
   };
-  const handleAddToCart = () => {
-    setIsInCart(true);
-  };
+
+
+  async function handleAddToCart() {
+    try {
+      if(!(user.userId)){ 
+        toast({
+          title: "Please login first",
+          description: "You need to log in to add courses to your cart.",
+        });
+        navigate('/');
+      }
+      else{
+        const userId=user.userId;
+        const courseId=CourseId;
+        const response = await fetch("http://localhost:8081/api/v1/addItem", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userId, courseId }),
+        });
+    
+        if (response.ok) {
+          setNumberOfItemInCart(numberOfItemInCart+1);
+          setIsInCart(true);
+          toast({
+            title: "Course added to cart",
+            description: "You can now proceed to checkout", 
+          });
+        } else {
+          const error = await response.json();
+          console.error("Error:", error);
+          return { success: false, message: error };
+        }
+      }
+    } catch (error) {
+      console.error("Unexpected Error:", error);
+      return { success: false, message: "Something went wrong." };
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <Button 

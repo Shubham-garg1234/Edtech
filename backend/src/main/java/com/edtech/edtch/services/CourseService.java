@@ -33,6 +33,7 @@ public class CourseService {
     }
 
     public List<SearchResult> getLike(String title) {
+        if(title=="")return new ArrayList<SearchResult>();
         List<Courses> coursesByTitle = coursesRepo.findCoursesByCourseNameContaining(title);
         List<Courses> coursesByDescription=coursesRepo.findCoursesByDescriptionContaining(title);
         coursesByDescription.removeAll(coursesByTitle);
