@@ -9,7 +9,8 @@ import { useAuth } from '@/AuthContext';
 
 interface CourseCardProps {
   name: string;
-  instructor: string;
+  instructor: {instructorName
+:string  };
   description: string;
   duration: string;
   lectures: number;
@@ -53,6 +54,7 @@ export const CourseCardLarge = ({
     description: description,
     image: imageUrl
   };
+  console.log(courseData);
 
 
   async function handleAddToCart() {
@@ -116,7 +118,8 @@ export const CourseCardLarge = ({
           <div className="space-y-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{courseData.name}</h1>
-              <p className="text-lg text-gray-600">by {courseData.instructor}</p>
+              <p className="text-lg text-gray-600">by {courseData.instructor.instructorName
+}</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="flex items-center">

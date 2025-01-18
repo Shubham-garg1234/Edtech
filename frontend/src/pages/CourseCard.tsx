@@ -7,6 +7,7 @@ const CourseCard = () => {
     const { CourseId } = useParams();
     const [CourseDetails,setCourseDetails]=useState({
         cousrseId: CourseId,
+        instructor:{instructorName:"Loading"},
         courseName:"Loading",
         description:"Loading",
         duration:"Loading",
@@ -33,6 +34,7 @@ const CourseCard = () => {
         const response= await fetch("http://localhost:8081/api/v1/getCourse/"+CourseId);
         const data= await response.json();
         setCourseDetails(data);
+        console.log(data);
     }
     getDetails();
   },[])
@@ -42,7 +44,7 @@ const CourseCard = () => {
       <div className="max-w-7xl mx-auto">
         <CourseCardLarge
           name={CourseDetails.courseName}
-          instructor="John Smith"
+          instructor={CourseDetails.instructor}
           description={CourseDetails.description}
           duration={CourseDetails.duration}
           lectures={CourseDetails.lectures}

@@ -83,6 +83,9 @@ const handleCartClick = () => {
         </div>
 
         <nav className="flex items-center gap-6">
+          <span className="hidden md:block text-sm font-medium cursor-pointer" onClick={()=>navigate("/myCourses")}>
+            My Courses
+          </span>
           <span className="hidden md:block text-sm font-medium cursor-pointer" onClick={()=>navigate("/teach")}>
             Teach on XYZ
           </span>

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useNavigate } from "react-router-dom";
+import { uploadImageAndGetUrl } from "@/util/ImageUpload";
 import {
   Card,
   CardContent,
@@ -25,7 +26,7 @@ import { useAuth } from "@/AuthContext";
 
 const Index = () => {
   const [startDate, setStartDate] = useState<Date>();
-  const [image, setImage] = useState<string>("");
+  const [courseImageURL, setcourseImageURL] = useState<string>("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -73,7 +74,7 @@ const Index = () => {
       return;
     }
 
-    console.log("Form submitted:", { ...formData, startDate, image });
+    console.log("Form submitted:", { ...formData, startDate, courseImageURL });
     toast.success("Course registered successfully!");
   };
 
@@ -87,14 +88,12 @@ const Index = () => {
     }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      const ImageURL=await uploadImageAndGetUrl(file);
+      setcourseImageURL(ImageURL);
+      console.log(ImageURL);
     }
   };
 
@@ -114,10 +113,10 @@ const Index = () => {
       lectures: formData.numLectures,
       assignments: formData.numAssignments,
       startDate: startDate,
+      courseImageURL: courseImageURL,
     };
-  
-    console.log("Registering course:", course);
-    console.log("http://localhost:8081/api/v1/addCourse/"+user.userId);
+
+    console.log(course);
 
     try {
       const response = await fetch("http://localhost:8081/api/v1/addCourse/"+user.userId, {
@@ -130,7 +129,6 @@ const Index = () => {
   
       if (response.ok) {
         const data = await response.json();
-        console.log("Course registered successfully:", data);
         alert("Course registered successfully!");
       } else {
         console.error("Failed to register course:", response.statusText);
@@ -381,9 +379,9 @@ const Index = () => {
                   onChange={handleImageChange}
                   required
                 />
-                {image && (
+                {courseImageURL && (
                   <img
-                    src={image}
+                    src={courseImageURL}
                     alt="Course preview"
                     className="mt-2 max-h-40 rounded-md"
                   />
