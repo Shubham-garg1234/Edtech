@@ -22,7 +22,7 @@ import {
 import { CalendarIcon, Upload } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { useAuth } from "@/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const [startDate, setStartDate] = useState<Date>();

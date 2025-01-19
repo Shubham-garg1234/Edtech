@@ -11,7 +11,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState({ userId: null, userName: null });
-  const [numberOfItemInCart, setNumberOfItemInCart] = useState(0); // State for cart items
+  const [numberOfItemInCart, setNumberOfItemInCart] = useState(0);
 
   return (
     <AuthContext.Provider value={{ user, setUser, numberOfItemInCart, setNumberOfItemInCart }}>

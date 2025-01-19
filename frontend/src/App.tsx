@@ -8,12 +8,19 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Cart from "./pages/Cart"
 import Teach from "./pages/Teach"
-import CourseCard from "./pages/CourseCard";
+import AboutCourse from "./pages/AboutCourse";
 import { Header } from "./components/Header";
+import MyCourses from "./pages/MyCourse";
+import CourseContent from "./pages/CourseContent";
+import { useAuth } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+
+  const { user } = useAuth();
+
+  return(
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -25,12 +32,13 @@ const App = () => (
           <Route path="/signup" element={<Signup />} />
           <Route path="/cart" element={<><Header/><Cart /></>} />
           <Route path="/teach" element={<Teach />} />
-          <Route path="/myCourses" element={<Teach />} />
-          <Route path="/Course/:CourseId" element={<CourseCard />} />
+          <Route path="/myCourses" element={<MyCourses />} />
+          <Route path="/Course/:CourseId" element={user.userId ? <AboutCourse /> : <AboutCourse />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

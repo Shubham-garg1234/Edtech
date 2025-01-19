@@ -3,14 +3,16 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useAuth } from "@/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
+import { useCart } from "@/contexts/CartContext";
 
 export const Header = () => {
   const navigate = useNavigate();
   const [searchResults, setSearchResults] = useState([]);
   const[searchWord,setSearchWord]=useState("");
-  const { user ,numberOfItemInCart, setNumberOfItemInCart} = useAuth();
+  const { user } = useAuth();
+  const { numberOfItemsInCart, setNumberOfItemsInCart } = useCart();
 
   async function handleSearch(str) {
     try {
@@ -92,7 +94,7 @@ const handleCartClick = () => {
           <Button variant="ghost" size="icon" className="relative" onClick={() => handleCartClick()}>
             <ShoppingCart className="h-5 w-5" />
             <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-xs text-white flex items-center justify-center">
-              {numberOfItemInCart}
+              {numberOfItemsInCart}
             </span>
           </Button>
           {user.userName ? (

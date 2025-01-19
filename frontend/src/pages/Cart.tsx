@@ -4,25 +4,42 @@ import CartSummary from "../components/CartSummary";
 import { ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useAuth } from "@/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 
 
 const Cart = () => {
 const navigate = useNavigate();
 const newCartItems=[];
 const [cartItems, setCartItems] = useState([]);  
-const { user ,numberOfItemInCart, setNumberOfItemInCart } = useAuth();
+const { user } = useAuth();
+const {cart,setCart,removeItemFromCart, numberOfItemsInCart, setNumberOfItemsInCart } = useCart();
 
 useEffect(()=>{
   if(!(user.userId)) navigate('/');
   else{
+    console.log(cart);
+    if(!cart)
     getCartItems();
+    else{
+    setCartItems(cart);
+    for(let i=0;i<cart.length;i++){
+      newCartItems.push({
+        id: cart[i].courseid,
+        title: cart[i].courseName,
+        price: cart[i].price,
+        image: cart[i].courseImageURL,
+      });
+    }
+    setCartItems(newCartItems);
+    }
   }
 },[])
 
   const handleRemoveItem = (id: number) => {
     setCartItems(cartItems.filter(item => item.id !== id));
     deleteItemFromCart(user.userId,id);
+    removeItemFromCart(id);
   };
 
   const handleCheckout = () => {
@@ -40,6 +57,8 @@ useEffect(()=>{
       });
 
       const data = await response.json();
+      setCart(data);
+
       for(let i=0;i<data.length;i++){
         newCartItems.push({
           id: data[i].courseid,
@@ -67,7 +86,7 @@ useEffect(()=>{
       });
   
       if (response.ok) {
-        setNumberOfItemInCart(numberOfItemInCart-1);
+        setNumberOfItemsInCart(numberOfItemsInCart-1);
         toast.success("Item removed from cart");
       } else {
         const error = await response.json();

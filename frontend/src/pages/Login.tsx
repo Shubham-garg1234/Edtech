@@ -14,7 +14,9 @@ import * as z from "zod";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { useState,useContext } from "react";
-import { useAuth } from "@/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
+import { CourseProvider, useCourses } from "@/contexts/CourseContext";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -31,7 +33,9 @@ const Login = () => {
     },
   });
 
-  const { setUser,numberOfItemInCart, setNumberOfItemInCart } = useAuth();
+  const { setUser,numberOfItemInCart } = useAuth();
+  const { setNumberOfItemsInCart } = useCart();
+  const { setPurchasedCourses} = useCourses();
 
   const onSubmit = async(values: z.infer<typeof formSchema>) => {
     try {
@@ -45,8 +49,9 @@ const Login = () => {
 
         if(response.ok){
           const res2=await response.json();
+          console.log(res2);
           setUser({ userId: res2.userId, userName: res2.userName,  });
-          setNumberOfItemInCart(res2.numberOfItemInCart);
+          setNumberOfItemsInCart(res2.numberOfItemInCart);
           navigate('/');
         }
 

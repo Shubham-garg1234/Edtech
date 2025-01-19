@@ -1,9 +1,9 @@
-import { CourseCardLarge } from "@/components/CourseCardLarge";
+import { AboutCoursePage } from "@/components/AboutCoursePage";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
 
-const CourseCard = () => {
+const AboutCourse = () => {
     const { CourseId } = useParams();
     const [CourseDetails,setCourseDetails]=useState({
         cousrseId: CourseId,
@@ -42,7 +42,7 @@ const CourseCard = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-7xl mx-auto">
-        <CourseCardLarge
+        <AboutCoursePage
           name={CourseDetails.courseName}
           instructor={CourseDetails.instructor}
           description={CourseDetails.description}
@@ -61,4 +61,4 @@ const CourseCard = () => {
   );
 };
 
-export default CourseCard;
+export default AboutCourse;

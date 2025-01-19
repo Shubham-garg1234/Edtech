@@ -4,7 +4,8 @@ import { Star, ArrowLeft, Clock, BookOpen, FileText, GraduationCap } from 'lucid
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
-import { useAuth } from '@/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 
 
 interface CourseCardProps {
@@ -23,7 +24,8 @@ interface CourseCardProps {
   onAddToCart: () => void;
 }
 
-export const CourseCardLarge = ({
+
+export const AboutCoursePage = ({
     name,
     instructor,
     description,
@@ -39,7 +41,9 @@ export const CourseCardLarge = ({
   }: CourseCardProps) => {
   const [isInCart, setIsInCart] = useState(false);
   const navigate = useNavigate();
-  const { user ,numberOfItemInCart, setNumberOfItemInCart } = useAuth();
+  const { user } = useAuth();
+  const { numberOfItemsInCart,addItemToCart, setNumberOfItemsInCart } = useCart();
+
   const { CourseId } = useParams();
   const courseData = {
     name: name,
@@ -54,7 +58,6 @@ export const CourseCardLarge = ({
     description: description,
     image: imageUrl
   };
-  console.log(courseData);
 
 
   async function handleAddToCart() {
@@ -78,12 +81,19 @@ export const CourseCardLarge = ({
         });
     
         if (response.ok) {
-          setNumberOfItemInCart(numberOfItemInCart+1);
+          const additem={
+            courseid: Number(CourseId),
+            courseName: courseData.name,
+            courseImageURL: courseData.image,
+            price: courseData.price,
+          };
+          addItemToCart(additem)
           setIsInCart(true);
           toast({
             title: "Course added to cart",
             description: "You can now proceed to checkout", 
-          });
+          })
+          ;
         } else {
           const error = await response.json();
           console.error("Error:", error);
