@@ -10,6 +10,7 @@ import Cart from "./pages/Cart"
 import Teach from "./pages/Teach"
 import CourseCard from "./pages/CourseCard";
 import { Header } from "./components/Header";
+import MyCourses from "./pages/MyCourses"
 
 const queryClient = new QueryClient();
 
@@ -25,7 +26,7 @@ const App = () => (
           <Route path="/signup" element={<Signup />} />
           <Route path="/cart" element={<><Header/><Cart /></>} />
           <Route path="/teach" element={<Teach />} />
-          <Route path="/myCourses" element={<Teach />} />
+          <Route path="/myCourses" element={<MyCourses />} />
           <Route path="/Course/:CourseId" element={<CourseCard />} />
         </Routes>
       </BrowserRouter>

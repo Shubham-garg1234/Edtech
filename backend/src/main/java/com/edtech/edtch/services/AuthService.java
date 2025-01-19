@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.edtech.edtch.models.Cart;
 import com.edtech.edtch.models.LoginRequest;
 import com.edtech.edtch.models.LoginResponse;
 import com.edtech.edtch.repositories.CartRepo;

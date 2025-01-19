@@ -11,10 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.edtech.edtch.models.CartResponse;
-import com.edtech.edtch.models.Courses;
 import com.edtech.edtch.models.ModifyCartRequest;
+import com.edtech.edtch.models.PurchaseRequest;
 import com.edtech.edtch.models.LoginResponse;
-import com.edtech.edtch.models.SearchResult;
 import com.edtech.edtch.services.CartService;
 
 @RestController
@@ -42,4 +41,8 @@ public class CartController {
         return cartService.addItem(userId, courseId);
     }
 
+    @PostMapping("/purchaseCourses")
+    public void purchaseCourses(@RequestBody PurchaseRequest purchaseRequest) {
+        cartService.purchaseCourses(purchaseRequest);
+    }
 }
