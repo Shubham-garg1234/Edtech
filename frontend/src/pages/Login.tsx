@@ -35,7 +35,7 @@ const Login = () => {
 
   const { setUser,numberOfItemInCart } = useAuth();
   const { setNumberOfItemsInCart } = useCart();
-  const { setPurchasedCourses} = useCourses();
+  const { purchasedCourses, setPurchasedCourses} = useCourses();
 
   const onSubmit = async(values: z.infer<typeof formSchema>) => {
     try {
@@ -52,6 +52,8 @@ const Login = () => {
           console.log(res2);
           setUser({ userId: res2.userId, userName: res2.userName,  });
           setNumberOfItemsInCart(res2.numberOfItemInCart);
+          setPurchasedCourses(res2.purchasedCourse);
+          console.log(res2);
           navigate('/');
         }
 

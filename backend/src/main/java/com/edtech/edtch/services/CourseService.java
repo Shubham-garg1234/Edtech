@@ -9,11 +9,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.edtech.edtch.models.CourseResponse;
 import com.edtech.edtch.models.Courses;
 import com.edtech.edtch.models.SearchResult;
+import com.edtech.edtch.models.UserEnrollments;
 import com.edtech.edtch.models.Users;
 import com.edtech.edtch.repositories.CoursesRepo;
 import com.edtech.edtch.repositories.InstructorRepo;
+import com.edtech.edtch.repositories.UserEnrollmentRepo;
 import com.edtech.edtch.repositories.UserRepo;
 import com.edtech.edtch.models.Instructors;
 
@@ -31,13 +34,23 @@ public class CourseService {
     @Autowired
     private UserRepo userRepo;
 
+    @Autowired
+    private UserEnrollmentRepo userEnrollmentRepo;
+
     public List<Courses> getAllCourses() {
         return coursesRepo.findAll();
     }
 
-    public Courses getCourse(int courseId) {
-        Courses cd = coursesRepo.findById(courseId).orElse(null);
-        return cd;
+    public CourseResponse getCourse(int courseId , int userId) {
+        Courses course = coursesRepo.findById(courseId).orElse(null);
+        Optional<UserEnrollments> existingEnrollment = userEnrollmentRepo.findEnrollments(courseId , userId);
+
+        int enrollmentStatus = existingEnrollment.isPresent() ? 1 : 0;
+
+        CourseResponse courseResponse = new CourseResponse();
+        courseResponse.setBought(enrollmentStatus);
+        courseResponse.setCourse(course);
+        return courseResponse;
     }
 
     public List<Courses> getFeatured() {

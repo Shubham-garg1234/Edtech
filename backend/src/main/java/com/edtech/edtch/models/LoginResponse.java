@@ -1,4 +1,6 @@
 package com.edtech.edtch.models;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,4 +15,5 @@ public class LoginResponse {
     private int userId;
     private String userName;
     private int numberOfItemInCart;
+    private List<Integer> purchasedCourse;
 }

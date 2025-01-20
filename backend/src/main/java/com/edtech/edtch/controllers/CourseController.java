@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.edtech.edtch.models.CourseRequest;
+import com.edtech.edtch.models.CourseResponse;
 import com.edtech.edtch.models.Courses;
 import com.edtech.edtch.models.SearchResult;
 import com.edtech.edtch.services.CourseService;
@@ -34,13 +36,14 @@ public class CourseController {
 
 
 
-    @GetMapping("/getCourse/{courseId}")
-    public ResponseEntity<?> getCourse(@PathVariable int courseId) {
-        Courses course=courseService.getCourse(courseId);
-        if(course!=null)
-        return new ResponseEntity<>(course,HttpStatus.OK);
+    @PostMapping("/getCourse")
+    public ResponseEntity<?> getCourse(@RequestBody CourseRequest courseRequest) {
+
+        CourseResponse courseResponse = courseService.getCourse(courseRequest.getCourseId() , courseRequest.getUserId());
+        if(courseResponse.getCourse()!=null)
+        return new ResponseEntity<>(courseResponse,HttpStatus.OK);
         else
-        return new ResponseEntity<>(course,HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(courseResponse,HttpStatus.NOT_FOUND);
     }
 
 
@@ -59,5 +62,4 @@ public class CourseController {
         System.out.println(userId);
         return courseService.addCourse(course, userId);
     }
-
 }

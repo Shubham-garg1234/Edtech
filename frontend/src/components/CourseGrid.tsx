@@ -13,7 +13,6 @@ export const CourseGrid = () => {
     const response= await fetch("http://localhost:8081/api/v1/getFeaturedCourses");
 
     const data=await response.json();
-    console.log(data);
     setcourses([
       {
         id: data[0].courseId,

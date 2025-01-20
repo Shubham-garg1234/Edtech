@@ -1,7 +1,8 @@
 import { AboutCoursePage } from "@/components/AboutCoursePage";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const AboutCourse = () => {
     const { CourseId } = useParams();
@@ -19,6 +20,29 @@ const AboutCourse = () => {
         courseImageURL:"Loading"
     });
 
+    const navigate = useNavigate();
+    const [bought,setBought]=useState(false);
+    const { user ,numberOfItemInCart, setNumberOfItemInCart } = useAuth();
+    
+    useEffect(()=>{
+      if(!(user.userId)) navigate('/');
+      else{
+        async function getCourse(){
+          const response= await fetch("http://localhost:8081/api/v1/getCourse", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ courseId: CourseId , userId: user.userId}),
+          });
+          const data= await response.json();
+          setCourseDetails(data.course);
+          setBought(data.bought);
+      }
+      getCourse();
+      }
+    },[]) 
+
 
   const handleAddToCart = () => {
     console.log("HI");
@@ -28,16 +52,6 @@ const AboutCourse = () => {
       
     });
   };
-
-  useEffect(()=>{
-    async function getDetails(){
-        const response= await fetch("http://localhost:8081/api/v1/getCourse/"+CourseId);
-        const data= await response.json();
-        setCourseDetails(data);
-        console.log(data);
-    }
-    getDetails();
-  },[])
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
@@ -54,6 +68,7 @@ const AboutCourse = () => {
           price={CourseDetails.price}
           rating={4.5}
           imageUrl={CourseDetails.courseImageURL}
+          bought={bought}
           onAddToCart={handleAddToCart}
         />
       </div>

@@ -21,6 +21,7 @@ interface CourseCardProps {
   price: number;
   rating: number;
   imageUrl: string;
+  bought: boolean;
   onAddToCart: () => void;
 }
 
@@ -37,6 +38,7 @@ export const AboutCoursePage = ({
     price,
     rating,
     imageUrl,
+    bought,
     onAddToCart,
   }: CourseCardProps) => {
   const [isInCart, setIsInCart] = useState(false);
@@ -45,6 +47,7 @@ export const AboutCoursePage = ({
   const { numberOfItemsInCart,addItemToCart, setNumberOfItemsInCart } = useCart();
 
   const { CourseId } = useParams();
+  
   const courseData = {
     name: name,
     instructor: instructor,
@@ -62,7 +65,7 @@ export const AboutCoursePage = ({
 
   async function handleAddToCart() {
     try {
-      if(!(user.userId)){ 
+      if((user.userId)=='0'){ 
         toast({
           title: "Please login first",
           description: "You need to log in to add courses to your cart.",
@@ -180,19 +183,21 @@ export const AboutCoursePage = ({
               <p className="text-gray-600 leading-relaxed">{courseData.description}</p>
             </div>
             <div className="flex items-center justify-between pt-4">
-              <div className="text-3xl font-bold text-gray-900">${courseData.price}</div>
-              <Button
-                size="lg"
-                onClick={handleAddToCart}
-                disabled={isInCart}
-                className={`${
-                  isInCart
-                    ? "bg-green-600 hover:bg-green-600 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700"
-                } transition-colors duration-200`}
-              >
-                {isInCart ? "Added to Cart" : "Add to Cart"}
-              </Button>
+              <div className='text-3xl font-bold text-gray-900'>${courseData.price}</div>
+              {!bought && (
+                <Button
+                  size="lg"
+                  onClick={handleAddToCart}
+                  disabled={isInCart}
+                  className={`${
+                    isInCart
+                      ? "bg-green-600 hover:bg-green-600 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700"
+                  } transition-colors duration-200`}
+                >
+                  {isInCart ? "Added to Cart" : "Add to Cart"}
+                </Button>
+              )}
             </div>
           </div>
         </div>

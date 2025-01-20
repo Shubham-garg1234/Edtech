@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
+import com.edtech.edtch.models.UserEnrollments;
+import com.edtech.edtch.models.PurchaseRequest;
+import com.edtech.edtch.repositories.UserEnrollmentRepo;
 import com.edtech.edtch.models.Cart;
 import com.edtech.edtch.models.CartResponse;
 import com.edtech.edtch.models.Courses;
@@ -29,6 +31,9 @@ public class CartService {
 
     @Autowired
     private UserRepo userRepo;
+
+    @Autowired
+    private UserEnrollmentRepo userEnrollmentRepo;
 
     public List<CartResponse> getCartItems(int userId) {
         List<Integer>allCourseId=cartRepo.findAllByUserId(userId);
@@ -57,30 +62,53 @@ public class CartService {
     }
 
     @Transactional
-public ResponseEntity<?> addItem(Integer userId, Integer courseId) {
-    
-    Users user = userRepo.findById(userId).orElse(null);
-    if (user == null) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+    public ResponseEntity<?> addItem(Integer userId, Integer courseId) {
+        
+        Users user = userRepo.findById(userId).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+        }
+        Courses course = courseRepo.findById(courseId).orElse(null);
+        if (course == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found.");
+        }
+        List<Integer> userCart = cartRepo.findAllByUserId(userId);
+        if (userCart.contains(courseId)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Item is already in the cart.");
+        }
+        try {
+            Cart newCartItem = new Cart();
+            newCartItem.setUser(user);
+            newCartItem.setCourse(course);
+            cartRepo.save(newCartItem);
+            return ResponseEntity.ok("Item successfully added to cart.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add item to cart.");
+        }
     }
-    Courses course = courseRepo.findById(courseId).orElse(null);
-    if (course == null) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found.");
+
+    @Transactional
+    public void purchaseCourses(PurchaseRequest purchaseRequest){
+
+        //Razorpay Logic
+
+        List<Integer> courseIds = purchaseRequest.getCourseIds();
+        Users user = userRepo.findById(purchaseRequest.getUserId()).orElse(null);
+        if(user == null){
+            return;
+        }
+        for (int courseId : courseIds) {
+            Courses course = courseRepo.findById(courseId).orElse(null);
+            if (course != null) {
+                UserEnrollments userEnrollment = new UserEnrollments();
+                userEnrollment.setUser(user);
+                userEnrollment.setCourse(course);
+                userEnrollmentRepo.save(userEnrollment);
+                cartRepo.deleteItem(purchaseRequest.getUserId(), courseId);
+            }
+        }
+
     }
-    List<Integer> userCart = cartRepo.findAllByUserId(userId);
-    if (userCart.contains(courseId)) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body("Item is already in the cart.");
-    }
-    try {
-        Cart newCartItem = new Cart();
-        newCartItem.setUser(user);
-        newCartItem.setCourse(course);
-        cartRepo.save(newCartItem);
-        return ResponseEntity.ok("Item successfully added to cart.");
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add item to cart.");
-    }
-}
 
     
 }

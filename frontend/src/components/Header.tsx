@@ -38,7 +38,7 @@ export const Header = () => {
 }
 
 const handleCartClick = () => {
-    if (!(user.userId)) {
+    if (user.userId=='0') {
       toast({
         title: "Please login first",
         description: "You need to log in to see your cart.",

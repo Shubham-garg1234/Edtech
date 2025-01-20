@@ -13,10 +13,13 @@ const navigate = useNavigate();
 const newCartItems=[];
 const [cartItems, setCartItems] = useState([]);  
 const { user } = useAuth();
-const {cart,setCart,removeItemFromCart, numberOfItemsInCart, setNumberOfItemsInCart } = useCart();
+const {cart,setCart,removeItemFromCart, numberOfItemsInCart, setNumberOfItemsInCart, clearCart } = useCart();
 
 useEffect(()=>{
-  if(!(user.userId)) navigate('/');
+  if((user.userId)=='0'){
+     navigate('/');
+     toast("You need to log in to see your cart.")
+  }
   else{
     console.log(cart);
     if(!cart)
@@ -42,8 +45,34 @@ useEffect(()=>{
     removeItemFromCart(id);
   };
 
-  const handleCheckout = () => {
-    toast.success("Proceeding to checkout...");
+  const handleCheckout = async () => {
+
+    try {
+      let courseIds = [];
+      cartItems.map((item) => (
+        courseIds.push(item.id)
+      ));
+      const response = await fetch("http://localhost:8081/api/v1/purchaseCourses", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify({courseIds, userId: user.userId})
+      });
+
+      if(response.ok){
+        setCartItems([])
+        clearCart();
+        toast.success("Checkout Successful!!");
+      }
+      else{
+        console.error("Failed to buy courses:", response.statusText);
+        alert("Failed to buy courses. Please try again.");
+      }
+
+    } catch (error) {
+        console.error("Error during purchasing course:", error);
+    }
   };
 
   async function getCartItems(){

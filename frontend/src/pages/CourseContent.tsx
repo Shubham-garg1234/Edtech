@@ -4,10 +4,12 @@ import { Container } from "@/components/ui/Container";
 import { VideoPlayer } from "@/components/ui/VideoPlayer";
 import { LessonList } from "@/components/LessonList";
 import { LiveBadge } from "@/components/ui/LiveBadge";
+import { useNavigate } from "react-router-dom";
 
 const CourseContent = () => {
   const { id } = useParams();
   const [selectedLesson, setSelectedLesson] = useState(0);
+  const navigate =useNavigate();
   
   // Sample data - in a real app this would come from an API
   const course = {
@@ -27,7 +29,14 @@ const CourseContent = () => {
 
   return (
     <Container>
+
       <div className="py-8">
+        <button
+          onClick={() => navigate('/')}
+          className="mb-6 text-gray-600 flex items-center hover:text-gray-900"
+        >
+          <span className="mr-1">←</span> Back
+        </button>
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2">{course.title}</h1>
           <p className="text-gray-600">Instructor: {course.instructor}</p>

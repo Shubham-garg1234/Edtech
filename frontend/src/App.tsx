@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useParams } from "react-router-dom";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -13,8 +13,24 @@ import { Header } from "./components/Header";
 import MyCourses from "./pages/MyCourse";
 import CourseContent from "./pages/CourseContent";
 import { useAuth } from "./contexts/AuthContext";
+import { useCourses } from "./contexts/CourseContext";
 
 const queryClient = new QueryClient();
+
+const CoursePage = () => {
+  const { CourseId } = useParams(); 
+  const { purchasedCourses } = useCourses();
+
+  let exist=false;
+  for(let i=0;i<purchasedCourses.length;i++){
+    const id=purchasedCourses[i];
+    if(id==Number (CourseId)){ 
+      exist=true;
+      break;
+    }
+  }
+  return exist ? <CourseContent /> : <AboutCourse />;
+};
 
 const App = () => {
 
@@ -33,7 +49,7 @@ const App = () => {
           <Route path="/cart" element={<><Header/><Cart /></>} />
           <Route path="/teach" element={<Teach />} />
           <Route path="/myCourses" element={<MyCourses />} />
-          <Route path="/Course/:CourseId" element={user.userId ? <AboutCourse /> : <AboutCourse />} />
+          <Route path="/Course/:CourseId" element={<CoursePage/>} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
