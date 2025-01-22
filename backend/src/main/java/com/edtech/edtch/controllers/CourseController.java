@@ -13,9 +13,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.edtech.edtch.models.CartResponse;
 import com.edtech.edtch.models.CourseRequest;
 import com.edtech.edtch.models.CourseResponse;
 import com.edtech.edtch.models.Courses;
+import com.edtech.edtch.models.LoginResponse;
+import com.edtech.edtch.models.MyCourseResponse;
 import com.edtech.edtch.models.SearchResult;
 import com.edtech.edtch.services.CourseService;
 
@@ -62,4 +65,10 @@ public class CourseController {
         System.out.println(userId);
         return courseService.addCourse(course, userId);
     }
+
+    @PostMapping("/getMyCourses")
+    public List<MyCourseResponse> getCartItems(@RequestBody LoginResponse user){
+        return courseService.getCartItems(user.getUserId());
+    }
+    
 }

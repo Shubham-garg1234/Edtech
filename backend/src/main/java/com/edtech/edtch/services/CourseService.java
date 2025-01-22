@@ -19,6 +19,7 @@ import com.edtech.edtch.repositories.InstructorRepo;
 import com.edtech.edtch.repositories.UserEnrollmentRepo;
 import com.edtech.edtch.repositories.UserRepo;
 import com.edtech.edtch.models.Instructors;
+import com.edtech.edtch.models.MyCourseResponse;
 
 import jakarta.transaction.Transactional;
 
@@ -97,6 +98,21 @@ public class CourseService {
         }
         course.setInstructor(instructor);
         return coursesRepo.save(course);
+    }
+
+    public List<MyCourseResponse> getCartItems(int userId) {
+        List<Integer> coursesId = userEnrollmentRepo.findByUserId(userId);
+        List<Courses> myCoursesDetails= coursesRepo.findAllById(coursesId);
+        List<MyCourseResponse> myCourses = new ArrayList<>();;
+        for(Courses course: myCoursesDetails){
+            MyCourseResponse myCourse = new MyCourseResponse();
+            myCourse.setCourseId(course.getCourseId());
+            myCourse.setCourseImageURL(course.getCourseImageURL());
+            myCourse.setCourseName(course.getCourseName());
+            myCourse.setInstructorName(course.getInstructor().getInstructorName());
+            myCourses.add(myCourse);
+        }
+        return myCourses;
     }
 
 }

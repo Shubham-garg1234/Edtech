@@ -9,6 +9,7 @@ import Signup from "./pages/Signup";
 import Cart from "./pages/Cart"
 import Teach from "./pages/Teach"
 import AboutCourse from "./pages/AboutCourse";
+import PaymentButton from "./components/PaymentService"
 import { Header } from "./components/Header";
 import MyCourses from "./pages/MyCourse";
 import CourseContent from "./pages/CourseContent";
@@ -35,7 +36,6 @@ const CoursePage = () => {
 const App = () => {
 
   const { user } = useAuth();
-
   return(
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -50,6 +50,7 @@ const App = () => {
           <Route path="/teach" element={<Teach />} />
           <Route path="/myCourses" element={<MyCourses />} />
           <Route path="/Course/:CourseId" element={<CoursePage/>} />
+          <Route path="/Payment" element={<PaymentButton/>} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

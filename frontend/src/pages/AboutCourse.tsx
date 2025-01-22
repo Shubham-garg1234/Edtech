@@ -21,8 +21,7 @@ const AboutCourse = () => {
     });
 
     const navigate = useNavigate();
-    const [bought,setBought]=useState(false);
-    const { user ,numberOfItemInCart, setNumberOfItemInCart } = useAuth();
+    const { user ,numberOfItemInCart, setNumberOfItemInCart,  } = useAuth();
     
     useEffect(()=>{
       if(!(user.userId)) navigate('/');
@@ -37,7 +36,6 @@ const AboutCourse = () => {
           });
           const data= await response.json();
           setCourseDetails(data.course);
-          setBought(data.bought);
       }
       getCourse();
       }
@@ -68,7 +66,6 @@ const AboutCourse = () => {
           price={CourseDetails.price}
           rating={4.5}
           imageUrl={CourseDetails.courseImageURL}
-          bought={bought}
           onAddToCart={handleAddToCart}
         />
       </div>

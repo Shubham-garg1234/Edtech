@@ -13,7 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
-import { useState,useContext } from "react";
+import { useState,useContext, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { CourseProvider, useCourses } from "@/contexts/CourseContext";
@@ -33,8 +33,8 @@ const Login = () => {
     },
   });
 
-  const { setUser,numberOfItemInCart } = useAuth();
-  const { setNumberOfItemsInCart } = useCart();
+  const { user, setUser,numberOfItemInCart } = useAuth();
+  const { setCart, setNumberOfItemsInCart } = useCart();
   const { purchasedCourses, setPurchasedCourses} = useCourses();
 
   const onSubmit = async(values: z.infer<typeof formSchema>) => {
@@ -53,7 +53,6 @@ const Login = () => {
           setUser({ userId: res2.userId, userName: res2.userName,  });
           setNumberOfItemsInCart(res2.numberOfItemInCart);
           setPurchasedCourses(res2.purchasedCourse);
-          console.log(res2);
           navigate('/');
         }
 

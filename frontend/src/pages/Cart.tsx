@@ -6,14 +6,19 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
+import { useCourses } from "@/contexts/CourseContext";
+import usePaymentService from "../components/PaymentService"
 
 
 const Cart = () => {
 const navigate = useNavigate();
-const newCartItems=[];
 const [cartItems, setCartItems] = useState([]);  
 const { user } = useAuth();
 const {cart,setCart,removeItemFromCart, numberOfItemsInCart, setNumberOfItemsInCart, clearCart } = useCart();
+const { addCourse } = useCourses();
+const { handlePayment } = usePaymentService();
+const total = cartItems.reduce((sum, item) => sum + item.price, 0);
+const [paymentResponse, setPaymentResponse] = useState(null);
 
 useEffect(()=>{
   if((user.userId)=='0'){
@@ -21,88 +26,61 @@ useEffect(()=>{
      toast("You need to log in to see your cart.")
   }
   else{
-    console.log(cart);
-    if(!cart)
-    getCartItems();
-    else{
     setCartItems(cart);
-    for(let i=0;i<cart.length;i++){
-      newCartItems.push({
-        id: cart[i].courseid,
-        title: cart[i].courseName,
-        price: cart[i].price,
-        image: cart[i].courseImageURL,
-      });
-    }
-    setCartItems(newCartItems);
-    }
   }
 },[])
 
-  const handleRemoveItem = (id: number) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
-    deleteItemFromCart(user.userId,id);
-    removeItemFromCart(id);
-  };
+  useEffect(()=>{
+    const AfterPayement = async () =>{
+      if (!paymentResponse) return;
+      let courseIds = cartItems.map((item) => item.courseid);
+      if (paymentResponse.ok) {
+        const response = await fetch("http://localhost:8081/api/v1/purchaseCourses", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"  ,
+          },
+          body: JSON.stringify({ courseIds, userId: user.userId }),
+        });
+
+        if(response.ok){
+          console.log(cartItems);
+          cartItems.map((item) => addCourse(
+            {
+              courseId: item.courseid,
+              courseName: item.courseNam,
+              instructorName: "Still remining",
+              courseImageURL: item.courseImageURL
+            }
+          ));
+          setCartItems([]);
+          clearCart();
+          toast("Transaction successfull ")
+        }else{
+          alert("Your Payment is success but error on our side Please contact support team");
+        }
+      } else {
+        console.error("Failed to buy courses:", paymentResponse.statusText);
+      }
+    }
+    AfterPayement();
+  },[paymentResponse])
 
   const handleCheckout = async () => {
-
     try {
-      let courseIds = [];
-      cartItems.map((item) => (
-        courseIds.push(item.id)
-      ));
-      const response = await fetch("http://localhost:8081/api/v1/purchaseCourses", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-          },
-          body: JSON.stringify({courseIds, userId: user.userId})
-      });
-
-      if(response.ok){
-        setCartItems([])
-        clearCart();
-        toast.success("Checkout Successful!!");
-      }
-      else{
-        console.error("Failed to buy courses:", response.statusText);
-        alert("Failed to buy courses. Please try again.");
-      }
-
+      const response=(await handlePayment(total));
+      setPaymentResponse(response);
     } catch (error) {
-        console.error("Error during purchasing course:", error);
+      console.error("Error during checkout:", error);
     }
+  }
+
+  const handleRemoveItem = (id: number) => {
+    setCartItems(cartItems.filter(item => item.courseid !== id));
+    deleteItemFromCart(user.userId,id);
+    removeItemFromCart(id);
+    setCart(cartItems);
   };
-
-  async function getCartItems(){
-    try {
-      const response = await fetch("http://localhost:8081/api/v1/getCartItems", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-          },
-          body: JSON.stringify(user)
-      });
-
-      const data = await response.json();
-      setCart(data);
-
-      for(let i=0;i<data.length;i++){
-        newCartItems.push({
-          id: data[i].courseid,
-          title: data[i].courseName,
-          price: data[i].price,
-          image: data[i].courseImageURL,
-        });
-      }
-      setCartItems(newCartItems);
-
-  } catch (error) {
-      console.error("Error during fetch:", error);
-  }
-  }
-
 
   async function deleteItemFromCart(userId, courseId) {
     try {
@@ -116,6 +94,7 @@ useEffect(()=>{
   
       if (response.ok) {
         setNumberOfItemsInCart(numberOfItemsInCart-1);
+        removeItemFromCart(Number(courseId));
         toast.success("Item removed from cart");
       } else {
         const error = await response.json();
@@ -127,8 +106,6 @@ useEffect(()=>{
       return { success: false, message: "Something went wrong." };
     }
   }  
-
-  const total = cartItems.reduce((sum, item) => sum + item.price, 0);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -155,7 +132,7 @@ useEffect(()=>{
             <div className="lg:col-span-2 space-y-4">
               {cartItems.map((item) => (
                 <CartItem
-                  key={item.id}
+                  key={item.courseid}
                   {...item}
                   onRemove={handleRemoveItem}
                 />

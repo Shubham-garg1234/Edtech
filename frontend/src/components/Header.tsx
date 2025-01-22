@@ -100,11 +100,6 @@ const handleCartClick = () => {
           {user.userName ? (
             <>
             <span className="text-sm font-medium">Hi, {user.userName}!</span>
-            <div className="hidden md:flex gap-2">
-              <Button variant="ghost" onClick={() => navigate("/")}>
-                Logout
-              </Button>
-            </div>
           </>
           ) :(
             <>

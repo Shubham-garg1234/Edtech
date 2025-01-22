@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 interface AuthContextType {
   user: { userId: string | null; userName: string | null };
@@ -10,8 +10,25 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState({ userId: "0", userName: null });
-  const [numberOfItemInCart, setNumberOfItemInCart] = useState(0);
+
+  const [user, setUser] = useState<{ userId: string | null; userName: string | null }>(() => {
+    const savedUser = sessionStorage.getItem("authUser");
+    return savedUser ? JSON.parse(savedUser) : { userId: "0", userName: null };
+  });
+  
+  const [numberOfItemInCart, setNumberOfItemInCart] = useState<number>(() => {
+    const savedCartCount = sessionStorage.getItem("numberOfItemInCart");
+    return savedCartCount ? JSON.parse(savedCartCount) : 0;
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem("authUser", JSON.stringify(user));
+  }, [user]);
+
+  useEffect(() => {
+    sessionStorage.setItem("numberOfItemInCart", JSON.stringify(numberOfItemInCart));
+  }, [numberOfItemInCart]);
+
 
   return (
     <AuthContext.Provider value={{ user, setUser, numberOfItemInCart, setNumberOfItemInCart }}>
