@@ -6,70 +6,83 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
-
+import { useCourses } from "@/contexts/CourseContext";
+import { refreshToken } from "@/util/RefreshToken";
 
 const Cart = () => {
-const navigate = useNavigate();
-const newCartItems=[];
-const [cartItems, setCartItems] = useState([]);  
-const { user } = useAuth();
-const {cart,setCart,removeItemFromCart, numberOfItemsInCart, setNumberOfItemsInCart, clearCart } = useCart();
+  const navigate = useNavigate();
+  const newCartItems=[];
+  const [cartItems, setCartItems] = useState([]);  
+  const { user , setUser } = useAuth();
+  const { setPurchasedCourses } = useCourses();
+  const {cart,setCart,removeItemFromCart, numberOfItemsInCart, setNumberOfItemsInCart, clearCart } = useCart();
+  const { addCourse } = useCourses();
 
-useEffect(()=>{
-  if((user.userId)=='0'){
-     navigate('/');
-     toast("You need to log in to see your cart.")
-  }
-  else{
-    console.log(cart);
-    if(!cart)
-    getCartItems();
+  useEffect(()=>{
+    if((user.userId)=='0'){
+      navigate('/');
+      toast("You need to log in to see your cart.")
+    }
     else{
-    setCartItems(cart);
-    for(let i=0;i<cart.length;i++){
-      newCartItems.push({
-        id: cart[i].courseid,
-        title: cart[i].courseName,
-        price: cart[i].price,
-        image: cart[i].courseImageURL,
-      });
+      if(!cart)
+      getCartItems();
+      else{
+      setCartItems(cart);
+      for(let i=0;i<cart.length;i++){
+        newCartItems.push({
+          id: cart[i].courseid,
+          title: cart[i].courseName,
+          price: cart[i].price,
+          image: cart[i].courseImageURL,
+        });
+      }
+      setCartItems(newCartItems);
+      }
     }
-    setCartItems(newCartItems);
-    }
-  }
-},[])
+  },[])
 
   const handleRemoveItem = (id: number) => {
     setCartItems(cartItems.filter(item => item.id !== id));
-    deleteItemFromCart(user.userId,id);
+    deleteItemFromCart(id);
     removeItemFromCart(id);
   };
 
   const handleCheckout = async () => {
-
     try {
       let courseIds = [];
       cartItems.map((item) => (
         courseIds.push(item.id)
       ));
-      const response = await fetch("http://localhost:8081/api/v1/purchaseCourses", {
+      const response = await fetch("http://localhost:8081/purchaseCourses", {
           method: "POST",
+          credentials: "include",
           headers: {
               "Content-Type": "application/json",
           },
-          body: JSON.stringify({courseIds, userId: user.userId})
+          body: JSON.stringify(courseIds)
       });
 
       if(response.ok){
+        for(let i=0;i<cart.length;i++){
+          addCourse(cart[i].courseid);
+        }
         setCartItems([])
         clearCart();
         toast.success("Checkout Successful!!");
       }
-      else{
-        console.error("Failed to buy courses:", response.statusText);
-        alert("Failed to buy courses. Please try again.");
+      else if (response.status === 403) {
+        console.log("Token Expired")
+        if(await refreshToken()){
+          await handleCheckout()
+        }
+        else{
+          setUser({userId: null, userName: null});
+          setNumberOfItemsInCart(0);
+          setPurchasedCourses(null);
+          toast.error("You need to login into your account")
+          navigate('/');
+        }
       }
-
     } catch (error) {
         console.error("Error during purchasing course:", error);
     }
@@ -77,50 +90,72 @@ useEffect(()=>{
 
   async function getCartItems(){
     try {
-      const response = await fetch("http://localhost:8081/api/v1/getCartItems", {
-          method: "POST",
+      const response = await fetch("http://localhost:8081/getCartItems", {
+          method: "GET",
+          credentials: "include",
           headers: {
               "Content-Type": "application/json",
           },
-          body: JSON.stringify(user)
       });
 
-      const data = await response.json();
-      setCart(data);
+      if(response.ok){
+        const data = await response.json();
+        setCart(data);
 
-      for(let i=0;i<data.length;i++){
-        newCartItems.push({
-          id: data[i].courseid,
-          title: data[i].courseName,
-          price: data[i].price,
-          image: data[i].courseImageURL,
-        });
+        for(let i=0;i<data.length;i++){
+          newCartItems.push({
+            id: data[i].courseid,
+            title: data[i].courseName,
+            price: data[i].price,
+            image: data[i].courseImageURL,
+          });
+        }
+        setCartItems(newCartItems);
       }
-      setCartItems(newCartItems);
-
-  } catch (error) {
-      console.error("Error during fetch:", error);
+      else if (response.status === 403) {
+        console.log("Token Expired")
+        if(await refreshToken()){
+          await getCartItems()
+        }
+        else{
+          setUser({userId: null, userName: null});
+          setNumberOfItemsInCart(0);
+          setPurchasedCourses(null);
+          navigate('/');
+        }
+      }
+    } catch (error) {
+        console.error("Error during fetch:", error);
+    }
   }
-  }
 
-
-  async function deleteItemFromCart(userId, courseId) {
+  async function deleteItemFromCart(courseId: number) {
     try {
-      const response = await fetch("http://localhost:8081/api/v1/deleteItem", {
+      const response = await fetch("http://localhost:8081/deleteItem", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId, courseId }),
+        body: JSON.stringify(courseId),
       });
   
       if (response.ok) {
         setNumberOfItemsInCart(numberOfItemsInCart-1);
         toast.success("Item removed from cart");
-      } else {
-        const error = await response.json();
-        console.error("Error:", error);
-        return { success: false, message: error };
+      } 
+      else if (response.status === 403) {
+        console.log("Token Expired")
+        if(await refreshToken()){
+          await deleteItemFromCart(courseId)
+        }
+        else{
+          setUser({userId: null, userName: null});
+          setNumberOfItemsInCart(0);
+          setPurchasedCourses(null);
+          toast.error("You need to login into your account")
+          navigate('/');
+        }
       }
     } catch (error) {
       console.error("Unexpected Error:", error);

@@ -6,13 +6,15 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
 import { useCart } from "@/contexts/CartContext";
+import { useCourses } from "@/contexts/CourseContext";
 
 export const Header = () => {
   const navigate = useNavigate();
   const [searchResults, setSearchResults] = useState([]);
   const[searchWord,setSearchWord]=useState("");
-  const { user } = useAuth();
+  const { setUser , user } = useAuth();
   const { numberOfItemsInCart, setNumberOfItemsInCart } = useCart();
+  const { setPurchasedCourses } = useCourses();
 
   async function handleSearch(str) {
     try {
@@ -21,7 +23,7 @@ export const Header = () => {
           setSearchResults([]);
           return;
         }
-        const response = await fetch("http://localhost:8081/api/v1/getLike", {
+        const response = await fetch("http://localhost:8081/api/getLike", {
             method: "POST",
             headers: {
                 "Content-Type": "text/plain",
@@ -48,15 +50,20 @@ const handleCartClick = () => {
     }
   };
 
-
+  const handleLogout = async () => {
+    setUser({userId: null, userName: null});
+    setNumberOfItemsInCart(0);
+    setPurchasedCourses(null);
+    navigate('/');
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="container flex h-14 items-center justify-between space-x-4">
         <div className="flex items-center gap-8">
-          <a href="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-primary">EduXcel</span>
-          </a>
+          <div className="flex items-center space-x-2">
+            <span onClick = {() => navigate('/')} className="text-2xl font-bold text-primary hover:cursor-pointer">EduXcel</span>
+          </div>
           <div className="hidden md:flex relative w-96">
             <Input
               type="search"
@@ -101,7 +108,7 @@ const handleCartClick = () => {
             <>
             <span className="text-sm font-medium">Hi, {user.userName}!</span>
             <div className="hidden md:flex gap-2">
-              <Button variant="ghost" onClick={() => navigate("/")}>
+              <Button variant="ghost" onClick={() => handleLogout()}>
                 Logout
               </Button>
             </div>

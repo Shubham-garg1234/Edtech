@@ -33,14 +33,15 @@ const Login = () => {
     },
   });
 
-  const { setUser,numberOfItemInCart } = useAuth();
+  const { setUser } = useAuth();
   const { setNumberOfItemsInCart } = useCart();
-  const { purchasedCourses, setPurchasedCourses} = useCourses();
+  const { setPurchasedCourses } = useCourses();
 
   const onSubmit = async(values: z.infer<typeof formSchema>) => {
     try {
-        const response = await fetch("http://localhost:8081/auth/login", {
+        const response = await fetch("http://localhost:8081/api/login", {
             method: "POST",
+            credentials: 'include',
             headers: {
                 "Content-Type": "application/json",
             },
@@ -49,11 +50,9 @@ const Login = () => {
 
         if(response.ok){
           const res2=await response.json();
-          console.log(res2);
           setUser({ userId: res2.userId, userName: res2.userName,  });
           setNumberOfItemsInCart(res2.numberOfItemInCart);
           setPurchasedCourses(res2.purchasedCourse);
-          console.log(res2);
           navigate('/');
         }
 

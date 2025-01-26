@@ -23,12 +23,17 @@ import { CalendarIcon, Upload } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { refreshToken } from "@/util/RefreshToken";
+import { useCart } from "@/contexts/CartContext";
+import { useCourses } from "@/contexts/CourseContext";
 
-const Index = () => {
+const Teach = () => {
   const [startDate, setStartDate] = useState<Date>();
   const [courseImageURL, setcourseImageURL] = useState<string>("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const { user } = useAuth();
+  const { setUser } = useAuth();
+  const { setNumberOfItemsInCart } = useCart();
+  const { setPurchasedCourses } = useCourses();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     courseName: "",
@@ -73,9 +78,6 @@ const Index = () => {
       toast.error("Please agree to the platform charges");
       return;
     }
-
-    console.log("Form submitted:", { ...formData, startDate, courseImageURL });
-    toast.success("Course registered successfully!");
   };
 
   const handleInputChange = (
@@ -93,7 +95,6 @@ const Index = () => {
     if (file) {
       const ImageURL=await uploadImageAndGetUrl(file);
       setcourseImageURL(ImageURL);
-      console.log(ImageURL);
     }
   };
 
@@ -116,11 +117,10 @@ const Index = () => {
       courseImageURL: courseImageURL,
     };
 
-    console.log(course);
-
     try {
-      const response = await fetch("http://localhost:8081/api/v1/addCourse/"+user.userId, {
+      const response = await fetch("http://localhost:8081/registerCourse", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -128,19 +128,26 @@ const Index = () => {
       });
   
       if (response.ok) {
-        const data = await response.json();
-        alert("Course registered successfully!");
-      } else {
-        console.error("Failed to register course:", response.statusText);
-        alert("Failed to register course. Please try again.");
+        toast.success("Course registered successfully!");
+      }
+      else if (response.status === 403) {
+        console.log("Token Expired")
+        if(await refreshToken()){
+          await registerCourse()
+        }
+        else{
+          setUser({userId: null, userName: null});
+          setNumberOfItemsInCart(0);
+          setPurchasedCourses(null);
+          toast.error("You need to login into your account")
+          navigate('/');
+        }
       }
     } catch (error) {
       console.error("Error registering course:", error);
-      alert("An error occurred. Please try again later.");
     }
   };
   
-
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-indigo-50 via-white to-pink-50">
       <button
@@ -417,4 +424,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Teach;

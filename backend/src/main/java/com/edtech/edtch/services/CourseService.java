@@ -3,12 +3,11 @@ package com.edtech.edtch.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import com.edtech.edtch.models.CourseResponse;
 import com.edtech.edtch.models.Courses;
 import com.edtech.edtch.models.SearchResult;
@@ -18,8 +17,8 @@ import com.edtech.edtch.repositories.CoursesRepo;
 import com.edtech.edtch.repositories.InstructorRepo;
 import com.edtech.edtch.repositories.UserEnrollmentRepo;
 import com.edtech.edtch.repositories.UserRepo;
+import com.edtech.edtch.utils.JwtUtil;
 import com.edtech.edtch.models.Instructors;
-
 import jakarta.transaction.Transactional;
 
 @Service
@@ -37,20 +36,27 @@ public class CourseService {
     @Autowired
     private UserEnrollmentRepo userEnrollmentRepo;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     public List<Courses> getAllCourses() {
         return coursesRepo.findAll();
     }
 
-    public CourseResponse getCourse(int courseId , int userId) {
+    public ResponseEntity<?> getCourse(String accessToken , int courseId) {
         Courses course = coursesRepo.findById(courseId).orElse(null);
-        Optional<UserEnrollments> existingEnrollment = userEnrollmentRepo.findEnrollments(courseId , userId);
-
-        int enrollmentStatus = existingEnrollment.isPresent() ? 1 : 0;
-
         CourseResponse courseResponse = new CourseResponse();
-        courseResponse.setBought(enrollmentStatus);
+        courseResponse.setBought(0);
         courseResponse.setCourse(course);
-        return courseResponse;
+        
+        if(!jwtUtil.isTokenExpired(accessToken)){
+            String userId = jwtUtil.validateToken(accessToken).getSubject();
+            Users user = userRepo.findById(Integer.parseInt(userId)).orElse(null);
+            Optional<UserEnrollments> existingEnrollment = userEnrollmentRepo.findEnrollments(courseId , user.getUserId());
+            if(existingEnrollment.isPresent())  courseResponse.setBought(1);
+        }
+        
+        return ResponseEntity.status(200).body(courseResponse);
     }
 
     public List<Courses> getFeatured() {
@@ -74,20 +80,19 @@ public class CourseService {
     }
 
     @Transactional
-    public Courses addCourse(Courses course, int userId) {
-        if (course == null) {
-            throw new IllegalArgumentException("Course cannot be null");
+    public ResponseEntity<?> registerCourse(String accessToken , Courses course) {
+        String userId = jwtUtil.validateToken(accessToken).getSubject();
+        Users user = userRepo.findById(Integer.parseInt(userId)).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(404).body("User Not Found");
         }
-        Optional<Instructors> existingInstructor = instructorRepo.findInstructorByUserId(userId);
+
+        Optional<Instructors> existingInstructor = instructorRepo.findInstructorByUserId(user.getUserId());
         Instructors instructor;
 
         if (existingInstructor.isPresent()) {
             instructor = existingInstructor.get();
-            System.out.println("Instructor already exists");
         } else {
-            Users user = userRepo.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
-
             instructor = new Instructors();
             instructor.setUser(user);
             instructor.setQualifications(course.getInstructor().getQualifications());
@@ -96,7 +101,7 @@ public class CourseService {
             instructor = instructorRepo.save(instructor);
         }
         course.setInstructor(instructor);
-        return coursesRepo.save(course);
+        coursesRepo.save(course);
+        return ResponseEntity.status(200).body("Course Registered Successfully");
     }
-
 }

@@ -10,40 +10,39 @@ export const CourseGrid = () => {
 
   async function fetchData(){
     try{
-    const response= await fetch("http://localhost:8081/api/v1/getFeaturedCourses");
-
-    const data=await response.json();
-    setcourses([
-      {
-        id: data[0].courseId,
-        title: data[0].courseName,
-        instructor: data[0].instructor.instructorName,
-        price: data[0].price,
-        rating: 4.8,
-        image: data[0].courseImageURL,
-      },
-      {
-        id: data[1].courseId,
-        title: data[1].courseName,
-        instructor: data[1].instructor.instructorName,
-        price: data[1].price,
-        rating: 4.6,
-        image: data[1].courseImageURL,
-      },
-      {
-        id: data[2].courseId,
-        title: data[2].courseName,
-        instructor: data[2].instructor.instructorName,
-        price: data[2].price,
-        rating: 4.7,
-        image: data[2].courseImageURL,
-      },
-    ]);
-    
-    }catch(err){
-      console.log(err);
+      const response= await fetch("http://localhost:8081/api/getFeaturedCourses");
+      const data=await response.json();
+      setcourses([
+        {
+          id: data[0].courseId,
+          title: data[0].courseName,
+          instructor: data[0].instructor.instructorName,
+          price: data[0].price,
+          rating: 4.8,
+          image: data[0].courseImageURL,
+        },
+        {
+          id: data[1].courseId,
+          title: data[1].courseName,
+          instructor: data[1].instructor.instructorName,
+          price: data[1].price,
+          rating: 4.6,
+          image: data[1].courseImageURL,
+        },
+        {
+          id: data[2].courseId,
+          title: data[2].courseName,
+          instructor: data[2].instructor.instructorName,
+          price: data[2].price,
+          rating: 4.7,
+          image: data[2].courseImageURL,
+        },
+      ]);
+      
+      }catch(err){
+        console.log(err);
+      }
     }
-  }
   
   useEffect(()=>{
     fetchData();

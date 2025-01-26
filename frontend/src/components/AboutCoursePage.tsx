@@ -6,6 +6,8 @@ import { Card } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
+import { refreshToken } from '@/util/RefreshToken';
+import { useCourses } from '@/contexts/CourseContext';
 
 
 interface CourseCardProps {
@@ -39,12 +41,12 @@ export const AboutCoursePage = ({
     rating,
     imageUrl,
     bought,
-    onAddToCart,
   }: CourseCardProps) => {
   const [isInCart, setIsInCart] = useState(false);
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { numberOfItemsInCart,addItemToCart, setNumberOfItemsInCart } = useCart();
+  const { user , setUser } = useAuth();
+  const { setPurchasedCourses } = useCourses();
+  const { addItemToCart, setNumberOfItemsInCart } = useCart();
 
   const { CourseId } = useParams();
   
@@ -67,20 +69,20 @@ export const AboutCoursePage = ({
     try {
       if((user.userId)=='0'){ 
         toast({
-          title: "Please login first",
-          description: "You need to log in to add courses to your cart.",
+          title: "Access Denied",
+          description: "You need to login into your account", 
         });
         navigate('/');
       }
       else{
-        const userId=user.userId;
         const courseId=CourseId;
-        const response = await fetch("http://localhost:8081/api/v1/addItem", {
+        const response = await fetch("http://localhost:8081/addItem", {
           method: "POST",
+          credentials: 'include',
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ userId, courseId }),
+          body: JSON.stringify(courseId),
         });
     
         if (response.ok) {
@@ -93,14 +95,20 @@ export const AboutCoursePage = ({
           addItemToCart(additem)
           setIsInCart(true);
           toast({
-            title: "Course added to cart",
-            description: "You can now proceed to checkout", 
-          })
-          ;
-        } else {
-          const error = await response.json();
-          console.error("Error:", error);
-          return { success: false, message: error };
+            title: "Course Added to your cart",
+          });
+        } 
+        else if (response.status === 403) {
+          console.log("Token Expired")
+          if(await refreshToken()){
+            await handleAddToCart()
+          }
+          else{
+            setUser({userId: null, userName: null});
+            setNumberOfItemsInCart(0);
+            setPurchasedCourses(null);
+            navigate('/');
+          }
         }
       }
     } catch (error) {
@@ -131,8 +139,7 @@ export const AboutCoursePage = ({
           <div className="space-y-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{courseData.name}</h1>
-              <p className="text-lg text-gray-600">by {courseData.instructor.instructorName
-}</p>
+              <p className="text-lg text-gray-600">by {courseData.instructor.instructorName}</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="flex items-center">

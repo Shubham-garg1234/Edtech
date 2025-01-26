@@ -13,9 +13,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
+import { toast } from "sonner";
 
 const formSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
+  username: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string(),
@@ -29,16 +30,35 @@ const Signup = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      username: "",
       email: "",
       password: "",
       confirmPassword: "",
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-    // Here you would typically handle signup logic
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const { email , username , password} = values
+    try {
+      const response = await fetch("http://localhost:8081/api/register", {
+          method: "POST",
+          credentials: 'include',
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email , username , password}),
+      });
+
+      if(response.ok){
+        toast.success("User Registered Successfully")
+        navigate('/login');
+      }
+      else if(response.status === 403){
+        toast.error("Email Already Exists")
+      }
+    } catch (error) {
+        console.error("Error during fetch:", error);
+    }
   };
 
   return (
@@ -51,7 +71,7 @@ const Signup = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
-                name="name"
+                name="username"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Name</FormLabel>
