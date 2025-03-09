@@ -1,8 +1,8 @@
 import { createContext, useContext, useState } from "react";
 
 interface AuthContextType {
-  user: { userId: string | null; userName: string | null };
-  setUser: (user: { userId: string | null; userName: string | null }) => void;
+  user: { userName: string | null };
+  setUser: (user: { userName: string | null }) => void;
   numberOfItemInCart: number; 
   setNumberOfItemInCart: (count: number) => void; 
 }
@@ -10,7 +10,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState({ userId: "0", userName: null });
+  const [user, setUser] = useState({ userName: null });
   const [numberOfItemInCart, setNumberOfItemInCart] = useState(0);
 
   return (

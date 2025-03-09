@@ -40,7 +40,7 @@ export const Header = () => {
 }
 
 const handleCartClick = () => {
-    if (user.userId=='0') {
+    if (user.userName==null) {
       toast({
         title: "Please login first",
         description: "You need to log in to see your cart.",
@@ -51,7 +51,7 @@ const handleCartClick = () => {
   };
 
   const handleLogout = async () => {
-    setUser({userId: null, userName: null});
+    setUser({userName: null});
     setNumberOfItemsInCart(0);
     setPurchasedCourses(null);
     navigate('/');

@@ -67,7 +67,7 @@ export const AboutCoursePage = ({
 
   async function handleAddToCart() {
     try {
-      if((user.userId)=='0'){ 
+      if((user.userName)==null){ 
         toast({
           title: "Access Denied",
           description: "You need to login into your account", 
@@ -104,7 +104,7 @@ export const AboutCoursePage = ({
             await handleAddToCart()
           }
           else{
-            setUser({userId: null, userName: null});
+            setUser({userName: null});
             setNumberOfItemsInCart(0);
             setPurchasedCourses(null);
             navigate('/');

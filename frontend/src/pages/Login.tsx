@@ -50,7 +50,7 @@ const Login = () => {
 
         if(response.ok){
           const res2=await response.json();
-          setUser({ userId: res2.userId, userName: res2.userName,  });
+          setUser({ userName: res2.userName,  });
           setNumberOfItemsInCart(res2.numberOfItemInCart);
           setPurchasedCourses(res2.purchasedCourse);
           navigate('/');

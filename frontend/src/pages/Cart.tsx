@@ -19,7 +19,7 @@ const Cart = () => {
   const { addCourse } = useCourses();
 
   useEffect(()=>{
-    if((user.userId)=='0'){
+    if((user.userName)==null){
       navigate('/');
       toast("You need to log in to see your cart.")
     }
@@ -76,7 +76,7 @@ const Cart = () => {
           await handleCheckout()
         }
         else{
-          setUser({userId: null, userName: null});
+          setUser({userName: null});
           setNumberOfItemsInCart(0);
           setPurchasedCourses(null);
           toast.error("You need to login into your account")
@@ -118,7 +118,7 @@ const Cart = () => {
           await getCartItems()
         }
         else{
-          setUser({userId: null, userName: null});
+          setUser({userName: null});
           setNumberOfItemsInCart(0);
           setPurchasedCourses(null);
           navigate('/');
@@ -150,7 +150,7 @@ const Cart = () => {
           await deleteItemFromCart(courseId)
         }
         else{
-          setUser({userId: null, userName: null});
+          setUser({userName: null});
           setNumberOfItemsInCart(0);
           setPurchasedCourses(null);
           toast.error("You need to login into your account")

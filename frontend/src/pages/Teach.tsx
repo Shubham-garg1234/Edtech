@@ -136,7 +136,7 @@ const Teach = () => {
           await registerCourse()
         }
         else{
-          setUser({userId: null, userName: null});
+          setUser({userName: null});
           setNumberOfItemsInCart(0);
           setPurchasedCourses(null);
           toast.error("You need to login into your account")
