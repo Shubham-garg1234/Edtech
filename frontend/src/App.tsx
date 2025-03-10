@@ -9,13 +9,13 @@ import Signup from "./pages/Signup";
 import Cart from "./pages/Cart"
 import Teach from "./pages/Teach"
 import AboutCourse from "./pages/AboutCourse";
-import PaymentButton from "./components/PaymentService"
 import { Header } from "./components/Header";
 import MyCourses from "./pages/MyCourse";
 import CourseContent from "./pages/CourseContent";
 import { useAuth } from "./contexts/AuthContext";
 import { useCourses } from "./contexts/CourseContext";
-
+import InstructorPanel from "./pages/InstructorPanel";
+import CourseManagement from "./components/CourseManagement";
 const queryClient = new QueryClient();
 
 const CoursePage = () => {
@@ -50,7 +50,10 @@ const App = () => {
           <Route path="/teach" element={<Teach />} />
           <Route path="/myCourses" element={<MyCourses />} />
           <Route path="/Course/:CourseId" element={<CoursePage/>} />
-          <Route path="/Payment" element={<PaymentButton/>} />
+          <Route path="/manageCourses" element={<InstructorPanel/>} />
+          <Route path="/manageCourses/:CourseId" element={<CourseManagement/>} />
+          <Route path="*" element={<div>404 - Page Not Found</div>} />
+          
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

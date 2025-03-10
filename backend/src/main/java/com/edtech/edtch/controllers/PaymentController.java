@@ -34,9 +34,7 @@ import com.edtech.edtch.services.PaymentService;
     @PostMapping("/verify")
         public ResponseEntity<?> verifyPayment(@RequestBody VerifyPaymentRequest data) {
             try {
-                System.out.println(data.getOrderId()+" "+data.getPaymentId()+" "+data.getRazorpaySignature());
                 boolean isValid = paymentService.verifyPayment(data.getOrderId(), data.getPaymentId(), data.getRazorpaySignature());
-                System.out.println(isValid);
                 if (isValid) {
                 return ResponseEntity.ok("Payment verified successfully");
                 } else {

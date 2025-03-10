@@ -1,13 +1,26 @@
 import { MyCourseCourseCard } from "@/components/MyCourseCourseCard";
 import { Container } from "@/components/ui/Container";
+import { useAuth } from "@/contexts/AuthContext";
 import { useCourses } from "@/contexts/CourseContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const MyCourses = () => {
   const { purchasedCourses,myCourses } = useCourses();
-  const [courses,setCourses]= useState(myCourses);
+  const [courses,setCourses]= useState([]);
   const navigate= useNavigate();
+  const { user } = useAuth();
+
+  useEffect(()=>{
+    if((user.userId)=='0'){
+       navigate('/');
+       toast("You need to log in to see your courses.")
+    }
+    else{
+      setCourses(myCourses);
+    }
+  },[])
 
   return (
     <Container>
