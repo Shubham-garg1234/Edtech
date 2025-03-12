@@ -37,8 +37,9 @@ public class CartService {
     private JwtUtil jwtUtil;
 
     public List<CartResponse> getCartItems(String accessToken) {
-        String userId = jwtUtil.validateToken(accessToken).getSubject();
-        Users user = userRepo.findById(Integer.parseInt(userId)).orElse(null);
+        String userId_str = jwtUtil.validateToken(accessToken).getSubject();
+        int userId = Integer.parseInt(userId_str);
+        Users user = userRepo.findById(userId).orElse(null);
         if (user == null) {
             return null;
         }
@@ -59,13 +60,14 @@ public class CartService {
 
     @Transactional
     public ResponseEntity<?> deleteItem(String accessToken , int courseId) {
-        String userId = jwtUtil.validateToken(accessToken).getSubject();
-        Users user = userRepo.findById(Integer.parseInt(userId)).orElse(null);
+        String userId_str = jwtUtil.validateToken(accessToken).getSubject();
+        int userId = Integer.parseInt(userId_str);
+        Users user = userRepo.findById(userId).orElse(null);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
         }
 
-        int rowsDeleted = cartRepo.deleteItem(user.getUserId(), courseId);
+        int rowsDeleted = cartRepo.deleteItem(userId, courseId);
         if (rowsDeleted > 0) {
             return ResponseEntity.ok("Item successfully deleted from cart.");
         } else {
@@ -75,8 +77,9 @@ public class CartService {
 
     @Transactional
     public ResponseEntity<?> addItem(String accessToken , Integer courseId) {
-        String userId = jwtUtil.validateToken(accessToken).getSubject();
-        Users user = userRepo.findById(Integer.parseInt(userId)).orElse(null);
+        String userId_str = jwtUtil.validateToken(accessToken).getSubject();
+        int userId = Integer.parseInt(userId_str);
+        Users user = userRepo.findById(userId).orElse(null);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
         }
@@ -102,8 +105,9 @@ public class CartService {
 
     @Transactional
     public ResponseEntity<?> purchaseCourses(String accessToken , List<Integer> courseIds){
-        String userId = jwtUtil.validateToken(accessToken).getSubject();
-        Users user = userRepo.findById(Integer.parseInt(userId)).orElse(null);
+        String userId_str = jwtUtil.validateToken(accessToken).getSubject();
+        int userId = Integer.parseInt(userId_str);
+        Users user = userRepo.findById(userId).orElse(null);
         if(user == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }

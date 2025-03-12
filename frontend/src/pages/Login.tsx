@@ -13,7 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
-import { useState,useContext } from "react";
+import { useState,useContext, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { CourseProvider, useCourses } from "@/contexts/CourseContext";

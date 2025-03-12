@@ -95,8 +95,8 @@ const handleCartClick = () => {
           <span className="hidden md:block text-sm font-medium cursor-pointer" onClick={()=>navigate("/myCourses")}>
             My Courses
           </span>
-          <span className="hidden md:block text-sm font-medium cursor-pointer" onClick={()=>navigate("/teach")}>
-            Teach on XYZ
+          <span className="hidden md:block text-sm font-medium cursor-pointer" onClick={()=>navigate("/manageCourses")}>
+            Manage Courses
           </span>
           <Button variant="ghost" size="icon" className="relative" onClick={() => handleCartClick()}>
             <ShoppingCart className="h-5 w-5" />

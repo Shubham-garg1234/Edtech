@@ -9,6 +9,75 @@ import { useEffect } from "react";
 import { refreshToken } from "@/util/RefreshToken";
 
 const Index = () => {
+
+  const { user } = useAuth();
+  const { isloaded, setCart, setloaded } = useCart();
+  const { setMyCourses } = useCourses();
+
+  useEffect(() => {
+    if (!user?.userName) {
+      getUserDetails();
+    }
+  }, []); 
+
+  useEffect(()=>{
+    if((user.userName!=null) && isloaded==false){getMyCourses(), getCartItems()}; 
+
+      async function getCartItems(){
+        try {
+          const response = await fetch("http://localhost:8081/api/getCartItems", {
+              method: "GET",
+              credentials: 'include',
+              headers: {
+                  "Content-Type": "application/json",
+              },
+          });
+          const data = await response.json();
+          const newCartItems=[];
+    
+          for(let i=0;i<data.length;i++){
+            newCartItems.push({
+              courseid: data[i].courseid,
+              courseName: data[i].courseName,
+              price: data[i].price,
+              courseImageURL: data[i].courseImageURL,
+            });
+          }
+
+          setCart(newCartItems);
+        } catch (error) {
+            console.error("Error during fetch:", error);
+        }
+      }
+
+      async function getMyCourses(){
+        try {
+          const response = await fetch("http://localhost:8081/api/getMyCourses", {
+              method: "POST",
+              credentials: 'include',
+              headers: {
+                  "Content-Type": "application/json",
+              },
+          });
+          const data = await response.json();
+          const myCourses=[];
+          for(let i=0;i<data.length;i++){
+            myCourses.push({
+              courseId: data[i].courseId,
+              courseName: data[i].courseName,
+              instructorName: data[i].instructorName,
+              courseImageURL: data[i].courseImageURL,
+            });
+          }
+          setMyCourses(myCourses);
+    
+        } catch (error) {
+            console.error("Error during fetch:", error);
+        }
+      }
+
+  },[user])
+
   const { setUser } = useAuth();
   const { setNumberOfItemsInCart } = useCart();
   const { setPurchasedCourses } = useCourses();
@@ -23,10 +92,9 @@ const Index = () => {
               "Content-Type": "application/json",
           },
       });
-
       if(response.ok){
         const res2=await response.json();
-        setUser({ userName: res2.userName,  });
+        setUser({ userName: res2.userName });
         setNumberOfItemsInCart(res2.numberOfItemInCart);
         setPurchasedCourses(res2.purchasedCourse);
         navigate('/');
@@ -41,10 +109,6 @@ const Index = () => {
       console.error("Error during fetch:", error);
     }
   };
-
-  useEffect(() => {
-      getUserDetails()
-  }, [])
 
   return (
     <div className="min-h-screen">

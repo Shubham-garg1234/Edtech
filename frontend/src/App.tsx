@@ -14,7 +14,8 @@ import MyCourses from "./pages/MyCourse";
 import CourseContent from "./pages/CourseContent";
 import { useAuth } from "./contexts/AuthContext";
 import { useCourses } from "./contexts/CourseContext";
-
+import InstructorPanel from "./pages/InstructorPanel";
+import CourseManagement from "./components/CourseManagement";
 const queryClient = new QueryClient();
 
 const CoursePage = () => {
@@ -35,7 +36,6 @@ const CoursePage = () => {
 const App = () => {
 
   const { user } = useAuth();
-
   return(
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -50,6 +50,10 @@ const App = () => {
           <Route path="/teach" element={<Teach />} />
           <Route path="/myCourses" element={<MyCourses />} />
           <Route path="/Course/:CourseId" element={<CoursePage/>} />
+          <Route path="/manageCourses" element={<InstructorPanel/>} />
+          <Route path="/manageCourses/:CourseId" element={<CourseManagement/>} />
+          <Route path="*" element={<div>404 - Page Not Found</div>} />
+          
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

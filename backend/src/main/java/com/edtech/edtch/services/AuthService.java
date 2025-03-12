@@ -116,7 +116,7 @@ public class AuthService {
 
         int count = cartRepo.countByUserId(user.getUserId());
         List<Integer> purchasedCourse=userEnrollmentRep.findByUserId(user.getUserId());
-        LoginResponse loginResponse = new LoginResponse(user.getUserId(), user.getUserName(),count,purchasedCourse);
+        LoginResponse loginResponse = new LoginResponse(0, user.getUserName(),count,purchasedCourse);
         return ResponseEntity.ok(loginResponse);
     }
 

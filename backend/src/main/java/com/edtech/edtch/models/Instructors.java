@@ -32,5 +32,10 @@ public class Instructors {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
-    private Users user; 
+    private Users user;
+
+    public int orElse(Object object) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'orElse'");
+    } 
 }

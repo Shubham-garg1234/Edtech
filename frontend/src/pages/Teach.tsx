@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -49,6 +49,13 @@ const Teach = () => {
     numLectures: "",
     numAssignments: "",
   });
+
+  useEffect(()=>{
+      if((user.userId)=='0'){
+         navigate('/');
+         toast("You need to log in to add a course.")
+      }
+    },[])
 
   const handleTopicChange = (index: number, value: string) => {
     const newTopics = [...formData.topics];
@@ -151,7 +158,7 @@ const Teach = () => {
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-indigo-50 via-white to-pink-50">
       <button
-    onClick={() => navigate('/')}
+    onClick={() => navigate('/manageCourses')}
     className="mb-6 text-gray-600 flex items-center hover:text-gray-900 absolute top-7 left-10"
   >
     <span className="mr-1">←</span> Back

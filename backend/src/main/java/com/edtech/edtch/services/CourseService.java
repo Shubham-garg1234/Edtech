@@ -19,6 +19,8 @@ import com.edtech.edtch.repositories.UserEnrollmentRepo;
 import com.edtech.edtch.repositories.UserRepo;
 import com.edtech.edtch.utils.JwtUtil;
 import com.edtech.edtch.models.Instructors;
+import com.edtech.edtch.models.MyCourseResponse;
+
 import jakarta.transaction.Transactional;
 
 @Service
@@ -43,21 +45,24 @@ public class CourseService {
         return coursesRepo.findAll();
     }
 
-    public ResponseEntity<?> getCourse(String accessToken , int courseId) {
+    public CourseResponse getCourse(int courseId , String accessToken) {
+        String userId_str = jwtUtil.validateToken(accessToken).getSubject();
+        int userId = Integer.parseInt(userId_str);
+        System.out.println("-------------------------------------------------");
+        System.out.println(userId_str);
+        System.out.println("-------------------------------------------------");
+
         Courses course = coursesRepo.findById(courseId).orElse(null);
+        Optional<UserEnrollments> existingEnrollment = userEnrollmentRepo.findEnrollments(courseId , userId);
+
+        int enrollmentStatus = existingEnrollment.isPresent() ? 1 : 0;
+
         CourseResponse courseResponse = new CourseResponse();
-        courseResponse.setBought(0);
+        courseResponse.setBought(enrollmentStatus);
         courseResponse.setCourse(course);
-        
-        if(!jwtUtil.isTokenExpired(accessToken)){
-            String userId = jwtUtil.validateToken(accessToken).getSubject();
-            Users user = userRepo.findById(Integer.parseInt(userId)).orElse(null);
-            Optional<UserEnrollments> existingEnrollment = userEnrollmentRepo.findEnrollments(courseId , user.getUserId());
-            if(existingEnrollment.isPresent())  courseResponse.setBought(1);
-        }
-        
-        return ResponseEntity.status(200).body(courseResponse);
+        return courseResponse;
     }
+
 
     public List<Courses> getFeatured() {
         Pageable top3 = PageRequest.of(0, 3);
@@ -104,4 +109,22 @@ public class CourseService {
         coursesRepo.save(course);
         return ResponseEntity.status(200).body("Course Registered Successfully");
     }
+
+    public List<MyCourseResponse> getMyCourses(String accessToken) {
+        String userId_str = jwtUtil.validateToken(accessToken).getSubject();
+        int userId = Integer.parseInt(userId_str);
+        List<Integer> coursesId = userEnrollmentRepo.findByUserId(userId);
+        List<Courses> myCoursesDetails= coursesRepo.findAllById(coursesId);
+        List<MyCourseResponse> myCourses = new ArrayList<>();;
+        for(Courses course: myCoursesDetails){
+            MyCourseResponse myCourse = new MyCourseResponse();
+            myCourse.setCourseId(course.getCourseId());
+            myCourse.setCourseImageURL(course.getCourseImageURL());
+            myCourse.setCourseName(course.getCourseName());
+            myCourse.setInstructorName(course.getInstructor().getInstructorName());
+            myCourses.add(myCourse);
+        }
+        return myCourses;
+    }
+
 }
