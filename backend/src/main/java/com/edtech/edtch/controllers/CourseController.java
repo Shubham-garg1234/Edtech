@@ -10,13 +10,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.edtech.edtch.models.CartResponse;
 import com.edtech.edtch.models.CourseRequest;
 // import com.edtech.edtch.models.CourseRequest;
 import com.edtech.edtch.models.CourseResponse;
 import com.edtech.edtch.models.Courses;
-import com.edtech.edtch.models.LoginResponse;
 import com.edtech.edtch.models.MyCourseResponse;
 import com.edtech.edtch.models.SearchResult;
 import com.edtech.edtch.services.CourseService;
@@ -64,6 +61,11 @@ public class CourseController {
     @PostMapping("/api/getMyCourses")
     public List<MyCourseResponse> getMyCourses(@CookieValue(required = false) String accessToken) {
         return courseService.getMyCourses(accessToken);
+    }
+
+    @PostMapping("/registerCourse")
+    public ResponseEntity<?> registerCourse(@CookieValue(required = false) String accessToken , @RequestBody Courses course) {
+        return courseService.registerCourse(accessToken , course);
     }
 
 }

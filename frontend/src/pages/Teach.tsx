@@ -31,7 +31,7 @@ const Teach = () => {
   const [startDate, setStartDate] = useState<Date>();
   const [courseImageURL, setcourseImageURL] = useState<string>("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const { setUser } = useAuth();
+  const { user , setUser } = useAuth();
   const { setNumberOfItemsInCart } = useCart();
   const { setPurchasedCourses } = useCourses();
   const navigate = useNavigate();
@@ -51,7 +51,7 @@ const Teach = () => {
   });
 
   useEffect(()=>{
-      if((user.userId)=='0'){
+      if((user.userName)=='0'){
          navigate('/');
          toast("You need to log in to add a course.")
       }

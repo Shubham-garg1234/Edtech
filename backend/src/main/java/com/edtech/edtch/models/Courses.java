@@ -40,4 +40,8 @@ public class Courses {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "instructor_id")
     private Instructors instructor;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "stream_id")
+    private Streams stream;
 }
