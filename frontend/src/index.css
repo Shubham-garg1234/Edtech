@@ -99,3 +99,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+.status-live {
+  @apply bg-red-500 text-white;
+}
+
+.status-ready {
+  @apply bg-green-500 text-white;
+}
+
+.status-offline {
+  @apply bg-slate-500 text-white;
+}
+
+.status-paused {
+  @apply bg-amber-500 text-white;
+}

@@ -14,9 +14,7 @@ const CourseManagement = () => {
     return <div>Course not found</div>;
   }
 
-  const handleGoLive = () =>{
-    console.log("Going live")
-  }
+  const courseId = window.location.pathname.split('/').pop();
 
   const managementOptions = [
     {
@@ -35,7 +33,7 @@ const CourseManagement = () => {
       title: "Go Live",
       description: "Start a live streaming session",
       icon: Radio,
-      action: () => {handleGoLive()}
+      action: () => {navigate(`/liveStream/${courseId}`)},
     },
     {
       title: "Make Announcement",
