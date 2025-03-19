@@ -10,10 +10,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Settings } from "lucide-react";
+import { toast } from "sonner";
 
 interface DeviceSelectorProps {
   onSelectAudioDevice: (deviceId: string) => void;
   onSelectVideoDevice: (deviceId: string) => void;
+  streamStatus: "offline" | "ready" | "live" | "paused";
 }
 
 interface MediaDevice {
@@ -21,7 +23,7 @@ interface MediaDevice {
   label: string;
 }
 
-const DeviceSelector = ({ onSelectAudioDevice, onSelectVideoDevice }: DeviceSelectorProps) => {
+const DeviceSelector = ({ onSelectAudioDevice, onSelectVideoDevice, streamStatus }: DeviceSelectorProps) => {
   const [audioDevices, setAudioDevices] = useState<MediaDevice[]>([]);
   const [videoDevices, setVideoDevices] = useState<MediaDevice[]>([]);
   const [selectedAudioDevice, setSelectedAudioDevice] = useState<string>("");
@@ -64,17 +66,25 @@ const DeviceSelector = ({ onSelectAudioDevice, onSelectVideoDevice }: DeviceSele
   };
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && streamStatus !== "live") {
       getDevices();
     }
   }, [isOpen]);
 
   const handleAudioDeviceChange = (deviceId: string) => {
+    if(streamStatus === "live"){
+      toast.error("Cannot switch audio device while stream is live");
+      return;
+    }
     setSelectedAudioDevice(deviceId);
     onSelectAudioDevice(deviceId);
   };
 
   const handleVideoDeviceChange = (deviceId: string) => {
+    if(streamStatus === "live"){
+      toast.error("Cannot switch audio device while stream is live");
+      return;
+    }
     setSelectedVideoDevice(deviceId);
     onSelectVideoDevice(deviceId);
   };

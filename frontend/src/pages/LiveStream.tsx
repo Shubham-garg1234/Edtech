@@ -14,14 +14,28 @@ import { useNavigate } from "react-router-dom";
 const LiveStream = () => {
   const [streamStatus, setStreamStatus] = useState<"offline" | "ready" | "live" | "paused">("offline");
   const [activeOption, setActiveOption] = useState<"camera" | "screen" | "whiteboard">("camera");
+  const [streamActive, setStreamActive] = useState(false);
+  const [selectedAudioDevice, setSelectedAudioDevice] = useState<string>("");
+  const [selectedVideoDevice, setSelectedVideoDevice] = useState<string>("");
   
   const handleStartStream = () => {
     if (streamStatus === "offline") {
       setStreamStatus("ready");
       toast.success("Stream ready to start");
     } else if (streamStatus === "ready" || streamStatus === "paused") {
-      setStreamStatus("live");
-      toast.success("Stream is now live!");
+      if(streamActive === false){
+        toast.error("Allow access to camera and microphone to start stream");
+      }
+      else {
+        setStreamStatus("live");
+        if(activeOption === "camera"){
+          
+        }
+        else{
+
+        }
+        toast.success("Stream started");
+      }
     }
   };
 
@@ -47,6 +61,10 @@ const LiveStream = () => {
   };
 
   const handleChangeOption = (option: "camera" | "screen" | "whiteboard") => {
+    if(streamStatus === "live"){
+      toast.error("Cannot switch view while stream is live");
+      return;
+    }
     setActiveOption(option);
     toast.success(`Switched to ${option} view`);
   };
@@ -71,7 +89,7 @@ const LiveStream = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8">
             <div className="mb-6">
-              <VideoPreview activeOption={activeOption} />
+              <VideoPreview streamActive={streamActive} setStreamActive={setStreamActive} streamStatus={streamStatus} selectedAudioDevice={selectedAudioDevice} selectedVideoDevice={selectedVideoDevice} setSelectedAudioDevice={setSelectedAudioDevice} setSelectedVideoDevice={setSelectedVideoDevice} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <LivestreamControls 
