@@ -3,6 +3,8 @@ package com.edtech.edtch.utils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.BinaryWebSocketHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.edtech.edtch.repositories.StreamRepo;
 import java.io.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -10,8 +12,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WebSocketStreamHandler extends BinaryWebSocketHandler {
     private final ConcurrentHashMap<String, Process> ffmpegProcesses = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, OutputStream> ffmpegInputs = new ConcurrentHashMap<>();
-
-    private static final String AWS_RTMP_BASE_URL = "rtmp://13.61.192.21:1935/test/live";
+    private final ConcurrentHashMap<Integer, String> courseStreamMap = new ConcurrentHashMap<>();
+    
+    @Autowired
+    StreamRepo StreamRepo;
 
     @Override
     public void handleBinaryMessage(@SuppressWarnings("null") WebSocketSession session, @SuppressWarnings("null") BinaryMessage message) {
@@ -29,9 +33,16 @@ public class WebSocketStreamHandler extends BinaryWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(@SuppressWarnings("null") WebSocketSession session) {
+        int courseId = Integer.parseInt(extractCourseId(session));
+        if (courseStreamMap.containsKey(courseId)) {
+            System.out.println("Stream already running for course: " + courseId);
+            closeSession(session, "Stream already running for this course.");
+            return;
+        }
+        courseStreamMap.put(courseId, session.getId());
         System.out.println("WebSocket connection established: " + session.getId());
         session.setBinaryMessageSizeLimit(1024 * 1024 * 10);  // 10 MB
-        startFFmpegProcess(session.getId());
+        startFFmpegProcess(session);
     }
 
     @Override
@@ -40,9 +51,11 @@ public class WebSocketStreamHandler extends BinaryWebSocketHandler {
         stopFFmpegProcess(session.getId());
     }
 
-    private void startFFmpegProcess(String sessionId) {
+    private void startFFmpegProcess(WebSocketSession session) {
+        String sessionId = session.getId();
         try {
-            String streamUrl = AWS_RTMP_BASE_URL;
+            int courseId = Integer.parseInt(extractCourseId(session));
+            String streamUrl = StreamRepo.getStreamFromCourse(courseId);
             ProcessBuilder processBuilder = new ProcessBuilder(
                 "ffmpeg", "-re", "-i", "pipe:0",
                 "-c:v", "libx264", "-preset", "ultrafast", "-tune", "zerolatency",
@@ -69,8 +82,28 @@ public class WebSocketStreamHandler extends BinaryWebSocketHandler {
                 ffmpegProcesses.get(sessionId).destroy();
                 ffmpegProcesses.remove(sessionId);
             }
+            if (courseStreamMap.containsValue(sessionId)) {
+                courseStreamMap.values().remove(sessionId);
+            }
         } catch (IOException e) {
             System.err.println("Error stopping FFmpeg for session " + sessionId + ": " + e.getMessage());
+        }
+    }
+
+    private String extractCourseId(WebSocketSession session) {
+        @SuppressWarnings("null")
+        String query = session.getUri().getQuery();
+        if (query != null && query.contains("courseId=")) {
+            return query.split("courseId=")[1].split("&")[0];
+        }
+        return "unknown_course";
+    }
+
+    private void closeSession(WebSocketSession session, String reason) {
+        try {
+            session.close(new CloseStatus(4000, reason));
+        } catch (IOException e) {
+            System.err.println("Error closing WebSocket session: " + e.getMessage());
         }
     }
 }

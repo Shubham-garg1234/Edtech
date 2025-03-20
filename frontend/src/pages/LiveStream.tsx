@@ -1,7 +1,6 @@
 
-import { useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import LivestreamControls from "@/components/LivestreamControls";
-import VideoPreview from "@/components/VideoPreview";
 import StreamStatus from "@/components/StreamStatus";
 import StreamOptions from "@/components/StreamOptions";
 import ChatSection from "@/components/ChatSection";
@@ -10,6 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessageCircle, Megaphone } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Mic, MicOff, Video, VideoOff } from "lucide-react";
+import DeviceSelector from "@/components/DeviceSelector";
 
 const LiveStream = () => {
   const [streamStatus, setStreamStatus] = useState<"offline" | "ready" | "live" | "paused">("offline");
@@ -17,44 +19,111 @@ const LiveStream = () => {
   const [streamActive, setStreamActive] = useState(false);
   const [selectedAudioDevice, setSelectedAudioDevice] = useState<string>("");
   const [selectedVideoDevice, setSelectedVideoDevice] = useState<string>("");
-  
-  const handleStartStream = () => {
-    if (streamStatus === "offline") {
-      setStreamStatus("ready");
-      toast.success("Stream ready to start");
-    } else if (streamStatus === "ready" || streamStatus === "paused") {
-      if(streamActive === false){
-        toast.error("Allow access to camera and microphone to start stream");
-      }
-      else {
-        setStreamStatus("live");
-        if(activeOption === "camera"){
-          
-        }
-        else{
+  const socketRef = useRef<WebSocket | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [audioEnabled, setAudioEnabled] = useState(true);
+  const [videoEnabled, setVideoEnabled] = useState(true);
+  const courseId = window.location.pathname.split('/').pop();
+  const navigate = useNavigate();
 
-        }
-        toast.success("Stream started");
+  const checkStream = async () => {
+    const response = await fetch("http://localhost:8081/api/checkStream", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(courseId)
+    });
+    if(response.ok){
+      setStreamStatus("offline");
+    }
+    else setStreamStatus("paused");
+  };
+
+  useEffect(() => {
+    checkStream();
+  }, []);
+
+  const startRecording = (mediaStream: MediaStream) => {
+    socketRef.current = new WebSocket(`ws://localhost:8081/api/stream?courseId=${courseId}`);
+    socketRef.current.onopen = () => {
+        console.log("WebSocket connected.");
+        setStreamStatus("live");
+        toast.success("You are now live");
+    };
+    socketRef.current.onerror = (error) => console.error("WebSocket error:", error);
+    
+    const recorder = new MediaRecorder(mediaStream, { mimeType: "video/webm; codecs=vp8" });
+    mediaRecorderRef.current = recorder;
+
+    recorder.ondataavailable = (event) => {
+      if (socketRef.current?.readyState === WebSocket.OPEN) {
+        socketRef.current.send(event.data);
+      }
+    };
+
+    recorder.start(100);
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+  
+    if (socketRef.current) {
+      socketRef.current.close();
+      console.log("WebSocket closed.");
+    }
+  };
+  
+  const handleStartStream = async () => {
+    if (streamStatus === "offline") {
+      if (!window.confirm("Are you sure you want to start the stream?")) return;
+      const response = await fetch("http://localhost:8081/api/prepareStream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(courseId)
+      });
+      if(response.ok){
+        setStreamStatus("ready");
+        toast.success("Stream ready to start");
+      }
+      else{
+        toast.error("Stream has already started on some other device");
+      }
+    } else if (streamStatus === "ready" || streamStatus === "paused") {
+      if(activeOption === "camera"){
+        startRecording(stream);
       }
     }
   };
 
   const handlePauseStream = () => {
     if (streamStatus === "live") {
+      stopRecording();
       setStreamStatus("paused");
       toast.info("Stream paused");
     }
   };
 
-  const handleStopStream = () => {
+  const handleStopStream = async () => {
     if (streamStatus !== "offline") {
-      setStreamStatus("offline");
-      toast.info("Stream ended");
+      stopRecording();
+      if (!window.confirm("Are you sure you want to end the stream?")) return;
+      const response = await fetch("http://localhost:8081/api/endStream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(courseId)
+      });
+      if(response.ok){
+        setStreamStatus("offline");
+        toast.info("Stream ended");
+      }
+      else{
+        toast.error("Stream fails to end");
+      }
     }
   };
-
-  const courseId = window.location.pathname.split('/').pop();
-  const navigate = useNavigate();
 
   const handleGoBack = () => {
     navigate(`/manageCourses/${courseId}`);
@@ -67,6 +136,50 @@ const LiveStream = () => {
     }
     setActiveOption(option);
     toast.success(`Switched to ${option} view`);
+  };
+
+  useEffect(() => {
+    const initializeStream = async () => {
+      try {
+        const constraints: MediaStreamConstraints = {
+          video: selectedVideoDevice ? { deviceId: { exact: selectedVideoDevice } } : true,
+          audio: selectedAudioDevice ? { deviceId: { exact: selectedAudioDevice } } : true,
+        };
+
+        const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+        setStream(mediaStream);
+        if (videoRef.current) videoRef.current.srcObject = mediaStream;
+      } catch (error) {
+        console.error("Error accessing media devices:", error);
+        setStreamActive(false);
+      }
+    };
+
+    if(selectedAudioDevice == "" || selectedVideoDevice == ""){
+      setStreamActive(false);
+    }
+    else setStreamActive(true);
+    if (streamActive) initializeStream();
+    
+    return () => {
+      stream?.getTracks().forEach(track => track.stop());
+      mediaRecorderRef.current?.stop();
+      socketRef.current?.close();
+    };
+  }, [selectedAudioDevice, selectedVideoDevice, streamActive]);
+
+  const toggleAudio = () => {
+    if (stream) {
+      stream.getAudioTracks().forEach(track => (track.enabled = !audioEnabled));
+      setAudioEnabled(!audioEnabled);
+    }
+  };
+
+  const toggleVideo = () => {
+    if (stream) {
+      stream.getVideoTracks().forEach(track => (track.enabled = !videoEnabled));
+      setVideoEnabled(!videoEnabled);
+    }
   };
 
   return (
@@ -88,8 +201,23 @@ const LiveStream = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8">
-            <div className="mb-6">
-              <VideoPreview streamActive={streamActive} setStreamActive={setStreamActive} streamStatus={streamStatus} selectedAudioDevice={selectedAudioDevice} selectedVideoDevice={selectedVideoDevice} setSelectedAudioDevice={setSelectedAudioDevice} setSelectedVideoDevice={setSelectedVideoDevice} />
+            <div className={`mb-6 ${!streamActive ? "bg-black rounded-2xl opacity-90" : "bg-transparent"}`}>
+              <div className="relative w-full h-full">
+                <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                <div className="absolute bottom-3 left-3 flex space-x-2">
+                  <Button onClick={toggleAudio} variant="outline" size="icon">
+                    {audioEnabled ? <Mic /> : <MicOff className="text-red-500" />}
+                  </Button>
+                  <Button onClick={toggleVideo} variant="outline" size="icon">
+                    {videoEnabled ? <Video /> : <VideoOff className="text-red-500" />}
+                  </Button>
+                  <DeviceSelector
+                    onSelectAudioDevice={setSelectedAudioDevice}
+                    onSelectVideoDevice={setSelectedVideoDevice}
+                    streamStatus={streamStatus}
+                  />
+                </div>
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <LivestreamControls 

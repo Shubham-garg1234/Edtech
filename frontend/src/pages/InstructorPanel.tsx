@@ -65,7 +65,7 @@ const InstructorPanel = () => {
 
 const sampleCourses = [
   {
-    id: 1,
+    id: 1926143760,
     title: "Web Development Fundamentals",
     description: "Learn the basics of web development with HTML, CSS, and JavaScript",
     image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",

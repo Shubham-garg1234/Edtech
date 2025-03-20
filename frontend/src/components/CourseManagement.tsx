@@ -141,7 +141,7 @@ const CourseManagement = () => {
 
 const sampleCourses = [
   {
-    CourseId: 1,
+    CourseId: 1926143760,
     title: "Web Development Fundamentals",
     description: "Learn the basics of web development with HTML, CSS, and JavaScript",
     image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
