@@ -92,7 +92,7 @@ const DeviceSelector = ({ onSelectAudioDevice, onSelectVideoDevice, streamStatus
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="icon" className="bg-white/10 backdrop-blur-sm">
+        <Button variant="outline" size="icon" className="bg-white backdrop-blur-sm">
           <Settings className="h-4 w-4" />
           <span className="sr-only">Settings</span>
         </Button>

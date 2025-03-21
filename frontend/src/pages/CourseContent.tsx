@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Container } from "@/components/ui/Container";
 import { VideoPlayer } from "@/components/ui/VideoPlayer";
 import { LessonList } from "@/components/LessonList";
 import { LiveBadge } from "@/components/ui/LiveBadge";
 import { useNavigate } from "react-router-dom";
+import HLSPlayer from "./HLSPlayer";
 
 const CourseContent = () => {
   const { id } = useParams();
@@ -13,7 +14,7 @@ const CourseContent = () => {
   
   // Sample data - in a real app this would come from an API
   const course = {
-    id: 1,
+    id: 1926143760,
     title: "Complete Web Development Bootcamp",
     instructor: "Sarah Johnson",
     isLive: true,
@@ -26,6 +27,24 @@ const CourseContent = () => {
       { id: 6, title: "CSS Assessment", type: "test" as const, duration: "30 mins", completed: false },
     ],
   };
+
+  const [streamStatus, setStreamStatus] = useState("offline");
+
+  const checkStream = async () => {
+      const response = await fetch("http://localhost:8081/api/checkStream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(course.id)
+      });
+      if(response.ok){
+        setStreamStatus("offline");
+      }
+      else setStreamStatus("live");
+    };
+  
+    useEffect(() => {
+      checkStream();
+    }, []);
 
   return (
     <Container>
@@ -44,10 +63,10 @@ const CourseContent = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            {course.isLive && (
+            {streamStatus === "live" && (
               <div className="mb-6">
                 <LiveBadge />
-                <VideoPlayer isLive={true} />
+                <HLSPlayer streamUrl = "https://lxr584.egress.xr65xh.mediapackagev2.eu-north-1.amazonaws.com/out/v1/Edtech/channel1/ep/index.m3u8" />
               </div>
             )}
             <VideoPlayer isLive={false} lesson={course.lessons[selectedLesson]} />

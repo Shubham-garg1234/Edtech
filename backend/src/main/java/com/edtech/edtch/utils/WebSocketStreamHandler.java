@@ -22,7 +22,7 @@ public class WebSocketStreamHandler extends BinaryWebSocketHandler {
         try {
             OutputStream ffmpegInput = ffmpegInputs.get(session.getId());
             if (ffmpegInput != null) {
-                System.out.println("Received binary message from " + session.getId() + ": " + message.getPayload().array().length + " bytes");
+                //System.out.println("Received binary message from " + session.getId() + ": " + message.getPayload().array().length + " bytes");
                 ffmpegInput.write(message.getPayload().array());
                 ffmpegInput.flush();
             }
