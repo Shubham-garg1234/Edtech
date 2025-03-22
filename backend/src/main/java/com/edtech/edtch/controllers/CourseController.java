@@ -68,4 +68,14 @@ public class CourseController {
         return courseService.registerCourse(accessToken , course);
     }
 
+    @GetMapping("/getInstructorCourses")
+    public ResponseEntity<?> getInstructorCourses(@CookieValue(required = false) String accessToken) {
+        return courseService.getInstructorCourses(accessToken);
+    }
+
+    @PostMapping("/getCourseById")
+    public ResponseEntity<?> getCourseById(@RequestBody int courseId) {
+        return courseService.getCourseById(courseId);
+    }
+
 }

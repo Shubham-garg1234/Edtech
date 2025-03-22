@@ -16,4 +16,8 @@ public interface CoursesRepo extends JpaRepository<Courses,Integer> {
 
     @Query("SELECT c FROM Courses c WHERE LOWER(c.Description) LIKE LOWER(CONCAT('%', :Description, '%'))")
     List<Courses> findCoursesByDescriptionContaining(@Param("Description") String Description);
+
+    @Query("SELECT c FROM Courses c WHERE c.instructor.user.UserId = :instructorId")
+    List<Courses> getInstructorCourses(int instructorId);
+
 }

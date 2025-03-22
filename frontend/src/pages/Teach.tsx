@@ -74,6 +74,15 @@ const Teach = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const requiredFields = [
+      startDate
+    ];
+
+    if (requiredFields.some((field) => !field)) {
+      toast.error("Please fill the starting date");
+      return;
+    }
     
     const price = Number(formData.price);
     if (price < 200 || price > 100000) {
@@ -85,6 +94,8 @@ const Teach = () => {
       toast.error("Please agree to the platform charges");
       return;
     }
+    
+    registerCourse();
   };
 
   const handleInputChange = (
@@ -419,7 +430,6 @@ const Teach = () => {
               <Button
                 type="submit"
                 className="w-full bg-gradient-to-r from-indigo-600 to-pink-500 hover:from-indigo-500 hover:to-pink-400 text-white transition-all duration-200"
-                onClick={registerCourse}
               >
                 Register Course
               </Button>

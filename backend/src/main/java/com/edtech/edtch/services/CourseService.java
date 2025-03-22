@@ -138,4 +138,23 @@ public class CourseService {
         return myCourses;
     }
 
+    public ResponseEntity<?> getInstructorCourses(String accessToken) {
+        String userId = jwtUtil.validateToken(accessToken).getSubject();
+        Users user = userRepo.findById(Integer.parseInt(userId)).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(404).body("User Not Found");
+        }
+
+        List<Courses> instructorCourses = coursesRepo.getInstructorCourses(user.getUserId());
+        return ResponseEntity.ok(instructorCourses); 
+    }
+
+    public ResponseEntity<?> getCourseById(int courseId) {
+        Courses course = coursesRepo.findById(courseId).orElse(null);
+        if (course == null) {
+            return ResponseEntity.status(404).body("Course Not Found");
+        }
+        return ResponseEntity.ok(course);
+    }
+
 }

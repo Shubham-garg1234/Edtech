@@ -1,20 +1,36 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Video, FileText, Radio, Bell, PlayCircle, BookOpen } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEffect, useState } from "react";
 
 const CourseManagement = () => {
-  const navigate = useNavigate();
-  const { CourseId } = useParams();
-  
-  const course = sampleCourses.find(c => c.CourseId === Number(CourseId));
-
-  if (!course) {
-    return <div>Course not found</div>;
-  }
-
+  const navigate = useNavigate();  
   const courseId = window.location.pathname.split('/').pop();
+
+  const [course , setCourse] = useState(null);
+
+  useEffect(() => {
+    const getCourse = async () => {
+      try{
+        const response = await fetch(`http://localhost:8081/getCourseById`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(courseId)
+        });
+        const data = await response.json();
+        setCourse(data);
+      }
+      catch(error){
+        console.error("Error fetching course: ", error);
+        navigate('/');
+      }
+    }
+    getCourse();
+  }, [])
+
 
   const managementOptions = [
     {
@@ -54,34 +70,38 @@ const CourseManagement = () => {
           ← Back to Courses
         </Button>
 
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <div className="flex flex-col md:flex-row gap-6">
-            <img
-              src={course.image}
-              alt={course.title}
-              className="w-full md:w-64 h-48 object-cover rounded-lg"
-            />
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{course.title}</h1>
-              <p className="text-gray-600 mb-4">{course.description}</p>
-              <div className="flex gap-4 text-sm text-gray-500">
-                <span className="flex items-center gap-1">
-                  <PlayCircle className="w-4 h-4" />
-                  {course.lectures} lectures
-                </span>
-                <span>{course.students} enrolled students</span>
+        {course !== null ?
+          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div className="flex flex-col md:flex-row gap-6">
+              <img
+                src={course.courseImageURL}
+                alt={course.courseName}
+                className="w-full md:w-64 h-48 object-cover rounded-lg"
+              />
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">{course.courseName}</h1>
+                <p className="text-gray-600 mb-4">{course.description}</p>
+                <div className="flex gap-4 text-sm text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <PlayCircle className="w-4 h-4" />
+                    {course.lectures} lectures
+                  </span>
+                  <span>{course.slots} enrolled students</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
+          :
+          <div></div>
+        }
+        
         <Tabs defaultValue="content" className="mb-8">
           <TabsList className="mb-4">
             <TabsTrigger value="content">Course Content</TabsTrigger>
             <TabsTrigger value="management">Course Management</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="content">
+          {/* <TabsContent value="content">
             <div className="space-y-4">
               {course.content.map((section, index) => (
                 <Card key={index} className="p-6">
@@ -110,7 +130,7 @@ const CourseManagement = () => {
                 </Card>
               ))}
             </div>
-          </TabsContent>
+          </TabsContent> */}
           
           <TabsContent value="management">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -138,53 +158,5 @@ const CourseManagement = () => {
     </div>
   );
 };
-
-const sampleCourses = [
-  {
-    CourseId: 1926143760,
-    title: "Web Development Fundamentals",
-    description: "Learn the basics of web development with HTML, CSS, and JavaScript",
-    image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-    students: 234,
-    lectures: 24,
-    content: [
-      {
-        title: "Getting Started with Web Development",
-        lectures: [
-          {
-            title: "Introduction to HTML",
-            type: "video",
-            duration: "15:30"
-          },
-          {
-            title: "Basic HTML Tags",
-            type: "video",
-            duration: "20:45"
-          },
-          {
-            title: "HTML Exercise Files",
-            type: "document",
-            duration: "10 pages"
-          }
-        ]
-      },
-      {
-        title: "CSS Fundamentals",
-        lectures: [
-          {
-            title: "CSS Selectors",
-            type: "video",
-            duration: "18:20"
-          },
-          {
-            title: "Box Model Explained",
-            type: "video",
-            duration: "22:15"
-          }
-        ]
-      }
-    ]
-  },
-];
 
 export default CourseManagement;

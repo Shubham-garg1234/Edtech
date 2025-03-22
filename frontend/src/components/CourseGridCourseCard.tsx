@@ -41,7 +41,7 @@ export const CourseCard = ({
                 />
               ))}
             </span>
-            <span className="ml-2 text-sm text-gray-600">{rating.toFixed(1)}</span>
+            <span className="ml-2 text-sm text-gray-600">{4.8}</span>
           </div>
           <div className="mt-3 font-bold text-lg">${price.toFixed(2)}</div>
         </div>
