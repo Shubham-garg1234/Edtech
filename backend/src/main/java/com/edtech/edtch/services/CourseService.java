@@ -14,10 +14,12 @@ import org.springframework.stereotype.Service;
 import com.edtech.edtch.models.CourseResponse;
 import com.edtech.edtch.models.Courses;
 import com.edtech.edtch.models.SearchResult;
+import com.edtech.edtch.models.Streams;
 import com.edtech.edtch.models.UserEnrollments;
 import com.edtech.edtch.models.Users;
 import com.edtech.edtch.repositories.CoursesRepo;
 import com.edtech.edtch.repositories.InstructorRepo;
+import com.edtech.edtch.repositories.StreamRepo;
 import com.edtech.edtch.repositories.LectureRepo;
 import com.edtech.edtch.repositories.UserEnrollmentRepo;
 import com.edtech.edtch.repositories.UserRepo;
@@ -48,6 +50,9 @@ public class CourseService {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private StreamRepo StreamRepo;
 
     public List<Courses> getAllCourses() {
         return coursesRepo.findAll();
@@ -101,7 +106,6 @@ public class CourseService {
 
         Optional<Instructors> existingInstructor = instructorRepo.findInstructorByUserId(user.getUserId());
         Instructors instructor;
-
         if (existingInstructor.isPresent()) {
             instructor = existingInstructor.get();
         } else {
@@ -113,6 +117,13 @@ public class CourseService {
             instructor = instructorRepo.save(instructor);
         }
         course.setInstructor(instructor);
+
+        Streams stream = StreamRepo.findStream();
+        if(stream == null){
+            return ResponseEntity.status(404).body("No Streams Available");
+        }
+        course.setStream(stream);
+
         coursesRepo.save(course);
         return ResponseEntity.status(200).body("Course Registered Successfully");
     }
