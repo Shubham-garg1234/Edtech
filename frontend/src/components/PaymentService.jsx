@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 export default function usePaymentService() {
-  const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_ID;
+  const RAZORPAY_KEY_ID = "rzp_test_mWhZkLa3BUx3J7";
 
   useEffect(() => {
     if (!window.Razorpay) {

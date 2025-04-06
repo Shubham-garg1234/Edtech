@@ -1,17 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect } from "react";
+import { useCourses } from "@/contexts/CourseContext";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const InstructorPanel = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+  const {InstructorCourses} = useCourses();
+  const [Courses, setCourses ]= useState([]);
+
   useEffect(()=>{
     if(!(user.userName)){
        navigate('/');
        toast("You need to log in to manage your courses.")
+    }else{
+      setCourses(InstructorCourses);
     }
   },[])
   
@@ -34,7 +39,7 @@ const InstructorPanel = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sampleCourses.map((course) => (
+          {Courses.map((course) => (
             <div
               key={course.id}
               className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
@@ -63,31 +68,31 @@ const InstructorPanel = () => {
   );
 };
 
-const sampleCourses = [
-  {
-    id: 1,
-    title: "Web Development Fundamentals",
-    description: "Learn the basics of web development with HTML, CSS, and JavaScript",
-    image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-    students: 234,
-    lectures: 24,
-  },
-  {
-    id: 2,
-    title: "Advanced React Patterns",
-    description: "Master advanced React concepts and patterns for scalable applications",
-    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
-    students: 189,
-    lectures: 18,
-  },
-  {
-    id: 3,
-    title: "Full Stack Development",
-    description: "Build complete web applications from frontend to backend",
-    image: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7",
-    students: 156,
-    lectures: 32,
-  },
-];
+// const sampleCourses = [
+//   {
+//     id: 1,
+//     title: "Web Development Fundamentals",
+//     description: "Learn the basics of web development with HTML, CSS, and JavaScript",
+//     image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
+//     students: 234,
+//     lectures: 24,
+//   },
+//   {
+//     id: 2,
+//     title: "Advanced React Patterns",
+//     description: "Master advanced React concepts and patterns for scalable applications",
+//     image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
+//     students: 189,
+//     lectures: 18,
+//   },
+//   {
+//     id: 3,
+//     title: "Full Stack Development",
+//     description: "Build complete web applications from frontend to backend",
+//     image: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7",
+//     students: 156,
+//     lectures: 32,
+//   },
+// ];
 
 export default InstructorPanel;

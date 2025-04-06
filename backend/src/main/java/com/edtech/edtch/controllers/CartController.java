@@ -24,8 +24,6 @@ public class CartController {
         return cartService.getCartItems(accessToken);
     }
 
-    // , @RequestBody Integer courseId
-
     @PostMapping("/api/deleteItem")
     public ResponseEntity<?> deleteItem(@CookieValue(required = true) String accessToken, @RequestBody Integer courseId) {
         return cartService.deleteItem(accessToken , courseId);

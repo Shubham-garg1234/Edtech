@@ -54,16 +54,26 @@ public class CourseController {
         return courseService.getLike(str);
     }
 
-    // @PostMapping("/addCourse/{userId}")
-    // public Courses addCourse(@RequestBody Courses course, @PathVariable int
-    // userId) {
-    // System.out.println(userId);
-    // return courseService.addCourse(course, userId);
-    // }
+    @PostMapping("/api/registerCourse")
+    public ResponseEntity<?> registerCourse(@RequestBody Courses course, @CookieValue(required = false) String accessToken) {
+    return courseService.registerCourse(accessToken, course);
+    }
 
     @PostMapping("/api/getMyCourses")
     public List<MyCourseResponse> getMyCourses(@CookieValue(required = false) String accessToken) {
         return courseService.getMyCourses(accessToken);
+    }
+
+    @PostMapping("/api/getInstructorCourses")
+    public ResponseEntity<?> getInstructorCourses(@CookieValue(required = false) String accessToken) {
+        return courseService.getInstructorCourses(accessToken);
+    }
+
+    @PostMapping("/api/getCourseManagementDetails")
+    public ResponseEntity<?> getCourseManagementDetails(@CookieValue(required = false) String accessToken,
+            @RequestBody CourseRequest courseRequest) {
+
+        return courseService.getCourseManagementDetails(courseRequest.getCourseId(), accessToken);
     }
 
 }

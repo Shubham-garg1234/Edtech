@@ -5,8 +5,8 @@
  * @throws {Error} - Throws an error if the upload fails or the file is invalid.
  */
 export const uploadImageAndGetUrl = async (file: File): Promise<string> => {
-  const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`;
-  const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+  const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/doheku3wc/image/upload`;
+  const UPLOAD_PRESET = "mopstpg2";
   
     if (!CLOUDINARY_URL || !UPLOAD_PRESET) {
       throw new Error("Cloudinary configuration is missing in environment variables");

@@ -16,6 +16,7 @@ import { useAuth } from "./contexts/AuthContext";
 import { useCourses } from "./contexts/CourseContext";
 import InstructorPanel from "./pages/InstructorPanel";
 import CourseManagement from "./components/CourseManagement";
+import VideoPlayer from "./util/VideoPlayer";
 const queryClient = new QueryClient();
 
 const CoursePage = () => {
@@ -52,6 +53,7 @@ const App = () => {
           <Route path="/Course/:CourseId" element={<CoursePage/>} />
           <Route path="/manageCourses" element={<InstructorPanel/>} />
           <Route path="/manageCourses/:CourseId" element={<CourseManagement/>} />
+          <Route path="/player/:key" element={<VideoPlayer />} />
           <Route path="*" element={<div>404 - Page Not Found</div>} />
           
         </Routes>

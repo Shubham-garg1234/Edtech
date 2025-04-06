@@ -1,11 +1,14 @@
 package com.edtech.edtch.services;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.edtech.edtch.models.CourseResponse;
@@ -15,10 +18,12 @@ import com.edtech.edtch.models.UserEnrollments;
 import com.edtech.edtch.models.Users;
 import com.edtech.edtch.repositories.CoursesRepo;
 import com.edtech.edtch.repositories.InstructorRepo;
+import com.edtech.edtch.repositories.LectureRepo;
 import com.edtech.edtch.repositories.UserEnrollmentRepo;
 import com.edtech.edtch.repositories.UserRepo;
 import com.edtech.edtch.utils.JwtUtil;
 import com.edtech.edtch.models.Instructors;
+import com.edtech.edtch.models.Lectures;
 import com.edtech.edtch.models.MyCourseResponse;
 
 import jakarta.transaction.Transactional;
@@ -33,6 +38,9 @@ public class CourseService {
     private InstructorRepo instructorRepo;
 
     @Autowired
+    private LectureRepo lectureRepo;
+
+    @Autowired
     private UserRepo userRepo;
 
     @Autowired
@@ -45,7 +53,7 @@ public class CourseService {
         return coursesRepo.findAll();
     }
 
-    public CourseResponse getCourse(int courseId , String accessToken) {
+    public CourseResponse getCourse(int courseId, String accessToken) {
         String userId_str = jwtUtil.validateToken(accessToken).getSubject();
         int userId = Integer.parseInt(userId_str);
         System.out.println("-------------------------------------------------");
@@ -53,7 +61,7 @@ public class CourseService {
         System.out.println("-------------------------------------------------");
 
         Courses course = coursesRepo.findById(courseId).orElse(null);
-        Optional<UserEnrollments> existingEnrollment = userEnrollmentRepo.findEnrollments(courseId , userId);
+        Optional<UserEnrollments> existingEnrollment = userEnrollmentRepo.findEnrollments(courseId, userId);
 
         int enrollmentStatus = existingEnrollment.isPresent() ? 1 : 0;
 
@@ -62,7 +70,6 @@ public class CourseService {
         courseResponse.setCourse(course);
         return courseResponse;
     }
-
 
     public List<Courses> getFeatured() {
         Pageable top3 = PageRequest.of(0, 3);
@@ -85,7 +92,7 @@ public class CourseService {
     }
 
     @Transactional
-    public ResponseEntity<?> registerCourse(String accessToken , Courses course) {
+    public ResponseEntity<?> registerCourse(String accessToken, Courses course) {
         String userId = jwtUtil.validateToken(accessToken).getSubject();
         Users user = userRepo.findById(Integer.parseInt(userId)).orElse(null);
         if (user == null) {
@@ -114,9 +121,10 @@ public class CourseService {
         String userId_str = jwtUtil.validateToken(accessToken).getSubject();
         int userId = Integer.parseInt(userId_str);
         List<Integer> coursesId = userEnrollmentRepo.findByUserId(userId);
-        List<Courses> myCoursesDetails= coursesRepo.findAllById(coursesId);
-        List<MyCourseResponse> myCourses = new ArrayList<>();;
-        for(Courses course: myCoursesDetails){
+        List<Courses> myCoursesDetails = coursesRepo.findAllById(coursesId);
+        List<MyCourseResponse> myCourses = new ArrayList<>();
+        ;
+        for (Courses course : myCoursesDetails) {
             MyCourseResponse myCourse = new MyCourseResponse();
             myCourse.setCourseId(course.getCourseId());
             myCourse.setCourseImageURL(course.getCourseImageURL());
@@ -125,6 +133,68 @@ public class CourseService {
             myCourses.add(myCourse);
         }
         return myCourses;
+    }
+
+    public ResponseEntity<?> getInstructorCourses(String accessToken) {
+        try {
+            String userId_str = jwtUtil.validateToken(accessToken).getSubject();
+            int userId = Integer.parseInt(userId_str);
+
+            Optional<Instructors> existingInstructor = instructorRepo.findInstructorByUserId(userId);
+            if (existingInstructor.isPresent()) {
+                Instructors instructor = existingInstructor.get();
+                List<Courses> courses = coursesRepo.findByInstructor(instructor);
+
+                List<Map<String, Object>> response = new ArrayList<>();
+
+                for (Courses course : courses) {
+                    Map<String, Object> courseData = new HashMap<>();
+                    if (course.getInstructor().getUser().getUserId() == userId) {
+                        courseData.put("id", course.getCourseId());
+                        courseData.put("title", course.getCourseName());
+                        courseData.put("description", course.getDescription());
+                        courseData.put("image", course.getCourseImageURL());
+                        courseData.put("students", course.getSlots());
+                        courseData.put("lectures", course.getLectures());
+                        response.add(courseData);
+                    }
+                }
+
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Instructor not found");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+        }
+    }
+
+    public ResponseEntity<?> addCourse(Courses course, String accessToken) {
+        String userId_str = jwtUtil.validateToken(accessToken).getSubject();
+        int userId = Integer.parseInt(userId_str);
+        coursesRepo.save(course);
+        return ResponseEntity.ok("OK");
+    }
+
+    public ResponseEntity<?> getCourseManagementDetails(int courseId, String accessToken) {
+        String userId_str = jwtUtil.validateToken(accessToken).getSubject();
+        int userId = Integer.parseInt(userId_str);
+
+        Optional<Courses> optionalCourse = coursesRepo.findById(courseId);
+        if (optionalCourse.isPresent()) {
+            Courses course = optionalCourse.get();
+
+            if (course.getInstructor().getUser().getUserId() != userId) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User Not Authorized to modify the course");
+            }
+            List<Lectures> content = lectureRepo.findAllByCourseId(course);
+            Map<String, Object> response = new HashMap<>();
+            response.put("course", course);
+            response.put("content", content);
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
+        }
     }
 
 }

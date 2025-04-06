@@ -12,7 +12,7 @@ const Index = () => {
 
   const { user } = useAuth();
   const { isloaded, setCart, setloaded } = useCart();
-  const { setMyCourses } = useCourses();
+  const { setMyCourses ,setInstructorCourses} = useCourses();
 
   useEffect(() => {
     if (!user?.userName) {
@@ -21,7 +21,7 @@ const Index = () => {
   }, []); 
 
   useEffect(()=>{
-    if((user.userName!=null) && isloaded==false){getMyCourses(), getCartItems()}; 
+    if((user.userName!=null) && isloaded==false){getMyCourses(), getCartItems(), getInstructorCourses()}; 
 
       async function getCartItems(){
         try {
@@ -69,9 +69,41 @@ const Index = () => {
               courseImageURL: data[i].courseImageURL,
             });
           }
+
           setMyCourses(myCourses);
     
         } catch (error) {
+            console.error("Error during fetch:", error);
+        }
+      }
+
+
+
+      async function getInstructorCourses(){
+        try {
+          const response = await fetch("http://localhost:8081/api/getInstructorCourses", {
+              method: "POST",
+              credentials: 'include',
+              headers: {
+                  "Content-Type": "application/json",
+              },
+          });
+          const data = await response.json();
+          const newInstructorCourses=[];
+
+          for(let i=0;i<data.length;i++){
+            newInstructorCourses.push({
+              id: data[i].id,
+              title: data[i].title,
+              description: data[i].description,
+              image: data[i].image || "https://tse2.mm.bing.net/th?id=OIP.JYDLll34aYDNbDUk2j81ZQHaEO&pid=Api&P=0&h=220",
+              students: data[i].students,
+              lectures: data[i].lectures,
+            });
+          }
+          setInstructorCourses(newInstructorCourses);
+        } catch (error) {
+          setInstructorCourses([]);
             console.error("Error during fetch:", error);
         }
       }

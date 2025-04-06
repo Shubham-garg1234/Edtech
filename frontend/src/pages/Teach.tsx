@@ -32,6 +32,7 @@ const Teach = () => {
   const [courseImageURL, setcourseImageURL] = useState<string>("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const { setUser } = useAuth();
+  const { user } = useAuth();
   const { setNumberOfItemsInCart } = useCart();
   const { setPurchasedCourses } = useCourses();
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ const Teach = () => {
   });
 
   useEffect(()=>{
-      if((user.userId)=='0'){
+      if(!(user.userName)){
          navigate('/');
          toast("You need to log in to add a course.")
       }
@@ -125,7 +126,7 @@ const Teach = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:8081/registerCourse", {
+      const response = await fetch("http://localhost:8081/api/registerCourse", {
         method: "POST",
         credentials: "include",
         headers: {
