@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import { Container } from "@/components/ui/Container";
 import { VideoPlayer } from "@/components/ui/VideoPlayer";
-import { LessonList } from "@/components/LessonList";
 import { LiveBadge } from "@/components/ui/LiveBadge";
 import { useNavigate } from "react-router-dom";
 import HLSPlayer from "./HLSPlayer";

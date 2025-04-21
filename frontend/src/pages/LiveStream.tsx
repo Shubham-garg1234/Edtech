@@ -6,7 +6,7 @@ import StreamOptions from "@/components/StreamOptions";
 import ChatSection from "@/components/ChatSection";
 import AnnouncementSection from "@/components/AnnouncementSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageCircle, Megaphone } from "lucide-react";
+import { MessageCircle, Megaphone, VolumeX, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ const LiveStream = () => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [speakerEnabled, setSpeakerEnabled] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [videoEnabled, setVideoEnabled] = useState(true);
   const courseId = window.location.pathname.split('/').pop();
@@ -182,6 +183,12 @@ const LiveStream = () => {
     }
   };
 
+  const toggleSpeaker = () => {
+    if(stream){
+      setSpeakerEnabled(!speakerEnabled);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="container mx-auto py-6 px-4 md:px-8">
@@ -203,8 +210,11 @@ const LiveStream = () => {
           <div className="lg:col-span-8">
             <div className={`mb-6 ${!streamActive ? "bg-black rounded-2xl opacity-90" : "bg-transparent"}`}>
               <div className="relative w-full h-full">
-                <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                <video ref={videoRef} muted={!speakerEnabled} autoPlay playsInline className="w-full h-full object-cover" />
                 <div className="absolute bottom-3 left-3 flex space-x-2">
+                  <Button onClick={toggleSpeaker} variant="outline" size="icon" aria-label={speakerEnabled ? "Unmute" : "Mute"}>
+                    {!speakerEnabled ? <VolumeX className="h-5 w-5 text-red-500" /> : <Volume2 className="h-5 w-5" />}
+                  </Button>
                   <Button onClick={toggleAudio} variant="outline" size="icon">
                     {audioEnabled ? <Mic /> : <MicOff className="text-red-500" />}
                   </Button>
